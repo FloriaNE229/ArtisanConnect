@@ -12,7 +12,7 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware): void {
-        //
+        // Middleware vides - JWT gère l'authentification
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         //

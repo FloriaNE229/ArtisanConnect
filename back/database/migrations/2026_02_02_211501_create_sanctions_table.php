@@ -11,14 +11,14 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('atelier', function (Blueprint $table) {
+        Schema::create('sanctions', function (Blueprint $table) {
             $table->id();
             $table->foreignId('user_id')->constrained('users')->onDelete('cascade');
-            $table->string("nom",150);
-            $table->string("image_principale")->nullable();
-            $table->text("description");
-            $table->string("domaine",100);
-            $table->string("localisation",255);
+            $table->enum('type', ['warning', 'suspension', 'ban'])->default('warning');
+            $table->text('description');
+            $table->integer('duration')->nullable(); // en jours
+            $table->timestamp('applied_at')->useCurrent();
+            $table->timestamp('lifted_at')->nullable();
             $table->timestamps();
         });
     }
@@ -28,6 +28,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('atelier');
+        Schema::dropIfExists('sanctions');
     }
 };
