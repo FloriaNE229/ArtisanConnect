@@ -11,7 +11,7 @@ class RendezVousSeeder extends Seeder
 {
     public function run(): void
     {
-        $client1   = User::where('email', 'client1@test.com')->first();
+        $client1   = User::where('email', 'hessouhrebecca@gmail.com')->first();
         $client2   = User::where('email', 'client2@test.com')->first();
         $atelier1  = Atelier::where('nom', 'Forge Koné')->first();
         $atelier2  = Atelier::where('nom', 'Bois & Création Hounsa')->first();
