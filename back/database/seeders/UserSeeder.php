@@ -18,7 +18,7 @@ use Illuminate\Support\Facades\Hash;
  *   artisan1@test.com / password123
  *   artisan2@test.com / password123
  */
-class UtilisateurSeeder extends Seeder
+class UserSeeder extends Seeder
 {
     public function run(): void
     {
