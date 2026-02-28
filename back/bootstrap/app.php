@@ -12,8 +12,22 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware): void {
-        // Middleware vides - JWT gère l'authentification
+            // ── Enregistrement des alias de middleware ───────────
+            $middleware->alias([
+                'role' => \App\Http\Middleware\CheckRole::class,
+            ]);
+
+            // ── Sanctum : stateful domains (utile pour SPA) ─────
+            // Commenter si API mobile pure (pas de cookie)
+            //$middleware->statefulApi();    
     })
     ->withExceptions(function (Exceptions $exceptions): void {
-        //
+         // Retourner du JSON pour les erreurs d'auth (pas de redirect)
+        $exceptions->render(function (AuthenticationException $e, Request $request) {
+            if ($request->expectsJson() || $request->is('api/*')) {
+                return response()->json([
+                    'message' => 'Non authentifié. Veuillez vous connecter.',
+                ], 401);
+            }
+        });
     })->create();
