@@ -9,8 +9,8 @@ class AtelierSeeder extends Seeder
 {
     public function run(): void
     {
-        $artisan1 = Artisan::whereHas('users', fn($q) => $q->where('email', 'artisan1@test.com'))->first();
-        $artisan2 = Artisan::whereHas('users', fn($q) => $q->where('email', 'artisan2@test.com'))->first();
+        $artisan1 = Artisan::whereHas('utilisateur', fn($q) => $q->where('email', 'artisan1@test.com'))->first();
+        $artisan2 = Artisan::whereHas('utilisateur', fn($q) => $q->where('email', 'artisan2@test.com'))->first();
 
         // ── ATELIER 1 : Ferronnerie ───────────────────────────
 

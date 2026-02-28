@@ -9,8 +9,8 @@ class HoraireSeeder extends Seeder
 {
     public function run(): void
     {
-        $artisan1 = Artisan::whereHas('users', fn($q) => $q->where('email', 'artisan1@test.com'))->first();
-        $artisan2 = Artisan::whereHas('users', fn($q) => $q->where('email', 'artisan2@test.com'))->first();
+        $artisan1 = Artisan::whereHas('utilisateur', fn($q) => $q->where('email', 'artisan1@test.com'))->first();
+        $artisan2 = Artisan::whereHas('utilisateur', fn($q) => $q->where('email', 'artisan2@test.com'))->first();
 
         // Artisan 1 : Lun-Sam 08h-18h
         $joursArtisan1 = [

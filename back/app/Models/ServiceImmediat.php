@@ -38,7 +38,7 @@ class ServiceImmediat extends Model
      */
     public function client(): BelongsTo
     {
-        return $this->belongsTo(Utilisateur::class, 'client_id');
+        return $this->belongsTo(User::class, 'client_id');
     }
 
     /**

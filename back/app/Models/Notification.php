@@ -71,6 +71,6 @@ class Notification extends Model
      */
     public function destinataire(): BelongsTo
     {
-        return $this->belongsTo(Utilisateur::class, 'destinataire_id');
+        return $this->belongsTo(User::class, 'destinataire_id');
     }
 }
