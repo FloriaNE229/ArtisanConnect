@@ -3,85 +3,84 @@ import { createContext, useContext, useState, useEffect, useRef } from 'react';
 const AuthContext = createContext();
 
 export function AuthProvider({ children }) {
-    const [user, setUser] = useState(null);
-    const [loading, setLoading] = useState(true);
-    const [accesToken, setAccessToken] = useState(null);
-    const isRefreshing = useRef(false);
-
+    const [user,        setUser]        = useState(null);
+    const [loading,     setLoading]     = useState(true);
+    const [accesToken,  setAccessToken] = useState(null);
+    const isRefreshing  = useRef(false);
 
     useEffect(() => {
         const checkSession = async () => {
-            // si un refresh est en cours on sort immediatement
             if (isRefreshing.current) return;
             isRefreshing.current = true;
-
-            // on tente de renouveler l'access token de l'user avec le refresh token en cookie
             try {
                 await refreshAccessToken();
-
-            } catch (error) {
+            } catch {
+                // Pas de session active — c'est normal (visiteur non connecté)
                 setUser(null);
-                setLoading(null);
-                setLoading(false);
-                throw new Error("Une erreur est survenue :", error);
-            }
-            finally {
+                setAccessToken(null);
+            } finally {
                 setLoading(false);
                 isRefreshing.current = false;
             }
-        }
+        };
         checkSession();
-        // // Vérifier si un token existe dans localStorage au chargement
-        // const token = localStorage.getItem('token');
-        // const userData = localStorage.getItem('user');
-
-        // if (token && userData) {
-        //     // eslint-disable-next-line react-hooks/set-state-in-effect
-        //     setUser(JSON.parse(userData));
-        // }
-        // // // eslint-disable-next-line react-hooks/set-state-in-effect
-        // setLoading(false);
     }, []);
 
-    const refreshAccessToken = async()=>{
-        const response = await fetch("/api/refresh", {
-            method: "GET",
-            credentials: 'include',
-            headers: {
-                'Accept': 'application/json',
-            }
+    const refreshAccessToken = async () => {
+        const response = await fetch('/api/refresh', {
+            method:      'GET',
+            credentials: 'include',         // envoie le cookie refresh_token
+            headers:     { Accept: 'application/json' },
         });
-        if(!response.ok){
-            throw new Error("une erreur est survenue", error);
+
+        if (!response.ok) {
+            throw new Error('Session expirée');
         }
+
         const data = await response.json();
-        if (!data.user) {
-            throw new Error("missing user");
+
+        // L'API renvoie { accesToken, user, ... }
+        if (!data.accesToken || !data.user) {
+            throw new Error('Réponse API invalide');
         }
-        if (!data.accesToken) {
-            throw new Error("missing accessToken");
-        }
+
         setUser(data.user);
         setAccessToken(data.accesToken);
-    }
-
-    const login = (userData, token) => {
-        setAccessToken(token)
-        setUser(userData);
     };
 
-    const logout = () => {
-        setAccessToken(null);
-        setUser(null);
+    /** Appelé après login ou register */
+    const login = (userData, token) => {
+        setUser(userData);
+        setAccessToken(token);
+    };
+
+    /** Appelé au logout */
+    const logout = async () => {
+        try {
+            await fetch('/api/logout', {
+                method:      'POST',
+                credentials: 'include',
+                headers: {
+                    Accept:          'application/json',
+                    Authorization:   accesToken ? `Bearer ${accesToken}` : '',
+                },
+            });
+        } catch {
+            // On déconnecte côté client même si l'API échoue
+        } finally {
+            setUser(null);
+            setAccessToken(null);
+        }
     };
 
     const value = {
         user,
         login,
         logout,
+        refreshAccessToken,
         isAuthenticated: !!user,
         loading,
-        accesToken
+        accesToken,
     };
 
     return (

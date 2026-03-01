@@ -1,3 +1,4 @@
+import { useNavigate } from "react-router-dom";
 import {
   Wrench,
   PlugZap,
@@ -6,130 +7,112 @@ import {
   HardHat,
   KeyRound,
 } from "lucide-react";
-
-import { GiSewingNeedle, GiComb, GiScissors } from "react-icons/gi";
+import { GiSewingNeedle, GiScissors } from "react-icons/gi";
 
 export default function CategoriesGrid() {
+  const navigate = useNavigate();
+
   const categories = [
     {
       name: "Plomberie",
-      color: "from-blue-500 to-blue-600",
-      icon: <Wrench className="w-10 h-10 text-white" />,
+      value: "plomberie",
+      color: "#3b82f6",
+      icon: Wrench,
     },
     {
       name: "Électricité",
-      color: "from-yellow-500 to-yellow-600",
-      icon: <PlugZap className="w-10 h-10 text-white" />,
+      value: "electricite",
+      color: "#eab308",
+      icon: PlugZap,
     },
     {
       name: "Menuiserie",
-      color: "from-orange-500 to-orange-600",
-      icon: <Hammer className="w-10 h-10 text-white" />,
+      value: "menuiserie",
+      color: "#f97316",
+      icon: Hammer,
     },
     {
       name: "Peinture",
-      color: "from-pink-500 to-pink-600",
-      icon: <Paintbrush className="w-10 h-10 text-white" />,
+      value: "peinture",
+      color: "#ec4899",
+      icon: Paintbrush,
     },
     {
       name: "Maçonnerie",
-      color: "from-red-500 to-red-600",
-      icon: <HardHat className="w-10 h-10 text-white" />,
+      value: "maconnerie",
+      color: "#ef4444",
+      icon: HardHat,
     },
     {
       name: "Couture",
-      color: "from-purple-500 to-purple-600",
-      icon: <GiSewingNeedle className="w-10 h-10 text-white" />,
+      value: "couture",
+      color: "#a855f7",
+      icon: GiSewingNeedle,
     },
     {
       name: "Coiffure",
-      color: "from-green-500 to-green-600",
-      icon: (
-        <div className="flex items-center gap-2">
-          <GiScissors className="text-white w-7 h-7" />
-          <GiComb className="text-white w-7 h-7" />
-        </div>
-      ),
+      value: "coiffure",
+      color: "#22c55e",
+      icon: GiScissors,
     },
     {
       name: "Mécanique",
-      color: "from-gray-500 to-gray-600",
-      icon: <KeyRound className="w-10 h-10 text-white" />,
+      value: "mecanique",
+      color: "#6b7280",
+      icon: KeyRound,
     },
   ];
 
+  const handleCategoryClick = (category) => {
+    navigate(`/artisans?category=${category.value}`);
+  };
+
   return (
-    <section
-      className="relative py-20"
-      style={{
-        background:
-          "linear-gradient(135deg, var(--gray) 0%, var(--light) 50%, var(--gray) 100%)",
-      }}
-    >
-      <div className="w-full max-w-6xl px-4 py-16 mx-auto sm:px-6 lg:px-8">
-        <div className="max-w-4xl mx-auto text-center">
-          <div
-            className="inline-flex items-center gap-2 px-4 py-2 mb-8 text-sm font-semibold rounded-full"
-            style={{
-              backgroundColor: "rgba(74, 111, 165, 0.1)",
-              color: "var(--primary)",
-            }}
-          >
-            <span
-              className="w-2 h-2 rounded-full animate-pulse"
-              style={{ backgroundColor: "var(--accent)" }}
-            />
+    <section className="py-12" style={{ backgroundColor: '#f8fafc' }}>
+      <div className="w-full max-w-3xl px-4 mx-auto sm:px-6">
+        
+        {/* Header */}
+        <div className="mb-10 text-center">
+          <div className="inline-flex items-center gap-2 px-4 py-1.5 mb-4 text-xs font-semibold rounded-full"
+            style={{ backgroundColor: 'rgba(74, 111, 165, 0.1)', color: '#4a6fa5' }}>
+            <span className="w-2 h-2 rounded-full animate-pulse" style={{ backgroundColor: '#4a6fa5' }} />
             Spécialités
           </div>
 
-          <h2
-            className="mb-6 text-4xl font-black leading-tight md:text-5xl"
-            style={{ color: "var(--dark)" }}
-          >
+          <h2 className="mb-3 text-3xl font-black md:text-4xl" style={{ color: '#2b2d42' }}>
             Explorez nos catégories
-            <br />
-            <span
-              className="text-transparent bg-clip-text"
-              style={{
-                background:
-                  "linear-gradient(90deg, var(--primary), var(--primary-light))",
-                WebkitBackgroundClip: "text",
-                WebkitTextFillColor: "transparent",
-              }}
-            >
-              d&apos;artisanat
+            <span className="text-transparent bg-gradient-to-r from-blue-600 to-blue-400 bg-clip-text" 
+              style={{ WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
+              {' '}d'artisanat
             </span>
           </h2>
 
-          <p
-            className="max-w-2xl mx-auto mb-10 text-lg md:text-xl"
-            style={{ color: "var(--dark)", opacity: 0.7 }}
-          >
-            Tous les métiers de l&apos;artisanat à votre service avec des
-            professionnels vérifiés
+          <p className="text-sm text-gray-600">
+            Tous les métiers de l'artisanat à votre service
           </p>
+        </div>
 
-          <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
-            {categories.map((category, index) => (
-              <div
+        {/* Grid encore plus étroit */}
+        <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
+          {categories.map((category, index) => {
+            const Icon = category.icon;
+            return (
+              <button
                 key={index}
-                className="p-6 transition-all duration-300 bg-white shadow-lg cursor-pointer rounded-xl hover:shadow-2xl hover:-translate-y-2 group"
-                style={{ border: "1px solid var(--gray-dark)" }}
+                onClick={() => handleCategoryClick(category)}
+                className="flex flex-col items-center gap-2 p-4 transition-all duration-300 bg-white border-2 border-gray-100 shadow-sm cursor-pointer rounded-xl hover:shadow-md hover:-translate-y-1 hover:border-gray-200 group"
               >
-                <div
-                  className={`w-20 h-20 mx-auto mb-4 rounded-2xl bg-gradient-to-br ${category.color} flex items-center justify-center transform group-hover:scale-110 transition-transform duration-300`}
-                >
-                  {category.icon}
-                </div>
-                <h3
-                  className="text-lg font-bold text-center"
-                  style={{ color: "var(--dark)" }}
-                >
+                <Icon 
+                  className="w-8 h-8 transition-transform duration-300 group-hover:scale-110"
+                  style={{ color: category.color }}
+                  strokeWidth={2}
+                />
+                <span className="text-xs font-bold text-center" style={{ color: '#2b2d42' }}>
                   {category.name}
-                </h3>
-              </div>
-            ))}
-          </div>
+                </span>
+              </button>
+            );
+          })}
         </div>
       </div>
     </section>

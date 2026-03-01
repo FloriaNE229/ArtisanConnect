@@ -27,6 +27,10 @@ import BookAppointment from "./Clients/pages/Appointments/BookAppointment";
 import ClientProfile from "./Clients/pages/Profile/ClientProfile";
 import EditProfile from "./Clients/pages/Profile/EditProfile";
 
+// Imports - Atelier
+import CreateAtelier from "./Clients/pages/Atelier/CreateAtelier";
+import EditAtelier from "./Clients/pages/Atelier/EditAtelier";
+
 // Imports Clients - Reviews 
 import WriteReview from "./Clients/pages/Reviews/WriteReview";
 import MyReviews from "./Clients/pages/Reviews/MyReviews";
@@ -47,7 +51,6 @@ import AdminReviews from "./Admin/pages/AdminReviews";
 import AdminSettings from "./Admin/pages/AdminSettings";
 import AdminLayout from "./Admin/layouts/AdminLayout";
 import { AuthProvider } from "./Clients/components/Auth/AuthContext";
-import AuthComponent from "./Clients/components/Auth/AuthComponent";
 
 function App() {
     return (
@@ -114,30 +117,26 @@ function App() {
                     <Route
                         path="/artisans"
                         element={
-                            <AuthComponent>
-                                <div className="flex flex-col min-h-screen">
-                                    <Header />
-                                    <main className="flex-grow">
-                                        <ArtisansList />
-                                    </main>
-                                    <Footer />
-                                </div>
-                            </AuthComponent>
+                            <div className="flex flex-col min-h-screen">
+                                <Header />
+                                <main className="flex-grow">
+                                    <ArtisansList />
+                                </main>
+                                <Footer />
+                            </div>
                         }
                     />
 
                     <Route
                         path="/artisan/:id"
                         element={
-                            <AuthComponent>
-                                <div className="flex flex-col min-h-screen">
-                                    <Header />
-                                    <main className="flex-grow">
-                                        <ArtisanDetail />
-                                    </main>
-                                    <Footer />
-                                </div>
-                            </AuthComponent>
+                            <div className="flex flex-col min-h-screen">
+                                <Header />
+                                <main className="flex-grow">
+                                    <ArtisanDetail />
+                                </main>
+                                <Footer />
+                            </div>
                         }
                     />
 
@@ -145,16 +144,13 @@ function App() {
                     <Route
                         path="/my-services"
                         element={
-                            <AuthComponent>
-                                <div className="flex flex-col min-h-screen">
-                                    <Header />
-                                    <main className="flex-grow">
-                                        <MyServices />
-                                    </main>
-                                    <Footer />
-                                </div>
-                            </AuthComponent>
-
+                            <div className="flex flex-col min-h-screen">
+                                <Header />
+                                <main className="flex-grow">
+                                    <MyServices />
+                                </main>
+                                <Footer />
+                            </div>
                         }
                     />
 
@@ -264,6 +260,33 @@ function App() {
                         }
                     />
 
+                    {/* ── Atelier ── */}
+                    <Route
+                        path="/atelier/create"
+                        element={
+                            <div className="flex flex-col min-h-screen">
+                                <Header />
+                                <main className="flex-grow">
+                                    <CreateAtelier />
+                                </main>
+                                <Footer />
+                            </div>
+                        }
+                    />
+
+                    <Route
+                        path="/atelier/:id/edit"
+                        element={
+                            <div className="flex flex-col min-h-screen">
+                                <Header />
+                                <main className="flex-grow">
+                                    <EditAtelier />
+                                </main>
+                                <Footer />
+                            </div>
+                        }
+                    />
+
                     {/* Reviews */}
                     <Route
                         path="/reviews/write/:artisanId"
@@ -305,7 +328,7 @@ function App() {
                         }
                     />
 
-
+                    {/* ========== ROUTES ADMIN ========== */}
                     <Route path="/admin/login" element={<AdminLogin />} />
 
                     <Route path="/admin" element={<AdminLayout />}>

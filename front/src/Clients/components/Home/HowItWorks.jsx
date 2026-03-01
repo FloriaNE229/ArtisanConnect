@@ -1,111 +1,158 @@
-import { Search, Calendar, Star, ChevronRight } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { Search, Calendar, Star, ChevronLeft, ChevronRight } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
 export default function HowItWorks() {
   const navigate = useNavigate();
+  const [currentIndex, setCurrentIndex] = useState(0);
 
   const steps = [
     {
       icon: Search,
+      number: 1,
       title: 'Recherchez',
-      description: 'Trouvez l\'artisan parfait selon vos besoins et localisation',
-      color: 'bg-gradient-to-br from-blue-500 to-blue-600',
-      borderColor: 'border-blue-200',
-      bgColor: 'rgba(59, 130, 246, 0.1)'
+      description: 'Trouvez l\'artisan parfait selon vos besoins',
+      color: '#4a6fa5',
     },
     {
       icon: Calendar,
+      number: 2,
       title: 'Réservez',
-      description: 'Prenez rendez-vous en ligne en quelques clics, sans attente',
-      color: 'bg-gradient-to-br from-[#ff7e5f] to-[#ff6b4a]',
-      borderColor: 'border-orange-200',
-      bgColor: 'rgba(255, 126, 95, 0.1)'
+      description: 'Prenez rendez-vous en ligne en quelques clics',
+      color: '#ff7e5f',
     },
     {
       icon: Star,
+      number: 3,
       title: 'Évaluez',
-      description: 'Partagez votre expérience et aidez la communauté',
-      color: 'bg-gradient-to-br from-green-500 to-green-600',
-      borderColor: 'border-green-200',
-      bgColor: 'rgba(34, 197, 94, 0.1)'
+      description: 'Partagez votre expérience avec la communauté',
+      color: '#22c55e',
     }
   ];
 
-  return (
-    <section className="relative py-20" style={{ backgroundColor: 'var(--light)' }}>
-      <div className="w-full max-w-6xl px-4 mx-auto sm:px-6 lg:px-8">
-        <div className="max-w-3xl mx-auto text-center">
-          <div className="inline-flex items-center gap-2 px-4 py-2 mb-8 text-sm font-semibold rounded-full" style={{ backgroundColor: 'rgba(74, 111, 165, 0.1)', color: 'var(--primary)' }}>
-            <span className="w-2 h-2 rounded-full animate-pulse" style={{ backgroundColor: 'var(--accent)' }}></span>
-            Fonctionnement
-          </div>
+  const goToPrevious = () => {
+    setCurrentIndex((prev) => (prev === 0 ? steps.length - 1 : prev - 1));
+  };
 
-          <h2 className="mb-6 text-4xl font-black leading-tight md:text-5xl" style={{ color: 'var(--dark)' }}>
-            Comment
-            <span className="text-transparent bg-gradient-to-r from-blue-600 to-blue-400 bg-clip-text" style={{ WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
-              {' '}ça marche ?
+  const goToNext = () => {
+    setCurrentIndex((prev) => (prev === steps.length - 1 ? 0 : prev + 1));
+  };
+
+  const goToSlide = (index) => {
+    setCurrentIndex(index);
+  };
+
+  useEffect(() => {
+    const interval = setInterval(goToNext, 5000);
+    return () => clearInterval(interval);
+  }, [currentIndex]);
+
+  return (
+    <section className="py-10" style={{ backgroundColor: '#f8fafc' }}>
+      <div className="container px-4 mx-auto">
+        
+        {/* Header compact */}
+        <div className="mb-8 text-center">
+          <h2 className="mb-1 text-2xl font-black md:text-3xl" style={{ color: '#2b2d42' }}>
+            Comment <span className="text-transparent bg-gradient-to-r from-blue-600 to-blue-400 bg-clip-text" 
+              style={{ WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
+              ça marche ?
             </span>
           </h2>
-
-          <p className="max-w-2xl mx-auto mb-12 text-lg md:text-xl" style={{ color: 'var(--dark)', opacity: 0.7 }}>
-            Trois étapes simples pour connecter artisans et clients
-          </p>
+          <p className="text-xs text-gray-600">Trois étapes simples</p>
         </div>
 
-        <div className="relative">
-          <div className="grid grid-cols-1 gap-8 md:grid-cols-3">
-            {steps.map((step, index) => (
-              <div key={index} className="relative group">
-                <div 
-                  className="relative h-full p-8 transition-all duration-300 bg-white shadow-xl rounded-2xl hover:shadow-2xl hover:-translate-y-2"
-                  style={{ border: '1px solid var(--gray-dark)' }}
+        <div className="relative max-w-2xl mx-auto">
+
+          {/* Flèche gauche */}
+          <button
+            onClick={goToPrevious}
+            className="absolute left-0 z-10 p-2 transition-all duration-300 transform -translate-x-6 -translate-y-1/2 bg-white rounded-full shadow-md top-1/2 md:-translate-x-12 hover:bg-gray-100 hover:scale-110"
+            aria-label="Étape précédente"
+          >
+            <ChevronLeft className="w-5 h-5 text-gray-700" />
+          </button>
+
+          {/* Contenu carousel - TRANSLUCIDE */}
+          <div className="p-6 overflow-hidden shadow-lg md:p-8 rounded-xl backdrop-blur-sm" 
+            style={{ backgroundColor: 'rgba(255, 255, 255, 0.7)' }}>
+            <div className="relative min-h-[200px] flex items-center justify-center">
+              {steps.map((step, index) => (
+                <div
+                  key={index}
+                  className={`absolute inset-0 transition-all duration-500 ease-in-out ${
+                    index === currentIndex
+                      ? 'opacity-100 translate-x-0'
+                      : index < currentIndex
+                      ? 'opacity-0 -translate-x-full'
+                      : 'opacity-0 translate-x-full'
+                  }`}
                 >
-                  <div className="absolute -top-6 left-8">
-                    <div className="relative">
-                      <div className={`w-14 h-14 ${step.color} rounded-2xl shadow-lg flex items-center justify-center transition-transform duration-300 group-hover:scale-110`}>
-                        <step.icon className="text-white w-7 h-7" strokeWidth={2} />
+                  <div className="flex flex-col items-center justify-center h-full">
+                    
+                    {/* Icon + numéro */}
+                    <div className="relative mb-4">
+                      <div className="flex items-center justify-center w-16 h-16 transition-transform duration-300 rounded-full shadow-lg hover:scale-110"
+                        style={{ background: `linear-gradient(135deg, ${step.color}, ${step.color}dd)` }}>
+                        <step.icon className="text-white w-7 h-7" strokeWidth={2.5} />
                       </div>
-                      <div className="absolute flex items-center justify-center w-8 h-8 text-xs font-bold text-white rounded-full -top-2 -right-2" style={{ backgroundColor: '#ff7e5f' }}>
-                        {index + 1}
+                      <div className="absolute flex items-center justify-center w-6 h-6 text-xs font-bold text-white rounded-full -top-1 -right-1"
+                        style={{ backgroundColor: '#ff7e5f' }}>
+                        {step.number}
                       </div>
                     </div>
-                  </div>
 
-                  <div className="pt-8">
-                    <h3 className="mb-3 text-xl font-bold" style={{ color: 'var(--dark)' }}>
+                    {/* Titre */}
+                    <h3 className="mb-3 text-xl font-bold text-center md:text-2xl" style={{ color: '#2b2d42' }}>
                       {step.title}
                     </h3>
-                    <p className="text-sm leading-relaxed" style={{ color: 'var(--dark)', opacity: 0.7 }}>
+
+                    {/* Description */}
+                    <p className="max-w-md text-sm leading-relaxed text-center text-gray-700">
                       {step.description}
                     </p>
                   </div>
-
-                  <div className="pt-6 mt-6 border-t" style={{ borderColor: 'var(--gray-dark)' }}>
-                    <div className="flex items-center justify-between">
-                      <span className="text-xs font-semibold" style={{ color: 'var(--dark)', opacity: 0.5 }}>
-                        Étape {index + 1}/3
-                      </span>
-                      <ChevronRight className="w-4 h-4 transition-transform group-hover:translate-x-1" style={{ color: '#ff7e5f' }} />
-                    </div>
-                  </div>
                 </div>
-              </div>
-            ))}
+              ))}
+            </div>
+
+            {/* Pagination dots */}
+            <div className="flex justify-center gap-2 mt-6">
+              {steps.map((_, index) => (
+                <button
+                  key={index}
+                  onClick={() => goToSlide(index)}
+                  className={`h-2 rounded-full transition-all duration-300 ${
+                    index === currentIndex
+                      ? 'bg-gray-900 w-6'
+                      : 'bg-gray-300 hover:bg-gray-400 w-2'
+                  }`}
+                  aria-label={`Aller à l'étape ${index + 1}`}
+                />
+              ))}
+            </div>
           </div>
+
+          {/* Flèche droite */}
+          <button
+            onClick={goToNext}
+            className="absolute right-0 z-10 p-2 transition-all duration-300 transform translate-x-6 -translate-y-1/2 bg-white rounded-full shadow-md top-1/2 md:translate-x-12 hover:bg-gray-100 hover:scale-110"
+            aria-label="Étape suivante"
+          >
+            <ChevronRight className="w-5 h-5 text-gray-700" />
+          </button>
         </div>
 
-        <div className="flex flex-col items-center max-w-2xl gap-6 p-8 mx-auto mt-16 bg-white shadow-xl sm:flex-row rounded-2xl" style={{ border: '1px solid var(--gray-dark)' }}>
-          <div className="text-center sm:text-left">
-            <h3 className="mb-2 text-xl font-bold" style={{ color: 'var(--dark)' }}>Prêt à commencer ?</h3>
-            <p className="text-sm" style={{ color: 'var(--dark)', opacity: 0.7 }}>
-              Rejoignez des milliers de clients satisfaits
-            </p>
+        {/* CTA compact */}
+        <div className="flex items-center justify-between max-w-xl gap-3 p-4 mx-auto mt-8 bg-white shadow-md rounded-xl">
+          <div>
+            <h3 className="text-sm font-bold" style={{ color: '#2b2d42' }}>Prêt à commencer ?</h3>
+            <p className="text-xs text-gray-600">Rejoignez des milliers de clients</p>
           </div>
           <button 
             onClick={() => navigate('/artisans')}
-            className="w-full px-6 py-3 text-sm font-bold text-white transition-all shadow-md sm:w-auto rounded-xl whitespace-nowrap hover:shadow-lg" 
-            style={{ background: 'linear-gradient(135deg, #ff7e5f, #ff6b4a)' }}
-          >
+            className="px-5 py-2 text-xs font-bold text-white transition-all rounded-lg shadow-md hover:shadow-lg hover:scale-105 whitespace-nowrap" 
+            style={{ background: 'linear-gradient(135deg, #ff7e5f, #feb47b)' }}>
             Trouver un artisan
           </button>
         </div>
