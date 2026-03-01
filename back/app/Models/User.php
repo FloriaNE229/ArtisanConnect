@@ -2,80 +2,113 @@
 
 namespace App\Models;
 
-// use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
-use Tymon\JWTAuth\Contracts\JWTSubject;
+use Illuminate\Database\Eloquent\Relations\HasOne;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Laravel\Sanctum\HasApiTokens;
 
-class User extends Authenticatable implements JWTSubject
+
+class User extends Authenticatable
 {
-    /** @use HasFactory<\Database\Factories\UserFactory> */
-    use HasFactory, Notifiable;
+    use HasApiTokens, HasFactory, Notifiable;
 
-    /**
-     * The attributes that are mass assignable.
-     *
-     * @var list<string>
-     */
+    protected $table = 'users';
+
     protected $fillable = [
         'nom',
         'prenom',
         'email',
-        'password',
+        'mot_de_passe',
+        'photo_profil',
         'role',
-        'photo_profil'
     ];
 
-    /**
-     * The attributes that should be hidden for serialization.
-     *
-     * @var list<string>
-     */
     protected $hidden = [
-        'password',
-        // 'remember_token',
+        'mot_de_passe',
     ];
 
     /**
-     * Get the attributes that should be cast.
-     *
-     * @return array<string, string>
+     * Surcharge pour que l'auth Laravel utilise 'mot_de_passe' au lieu de 'password'.
      */
-    protected function casts(): array
+    public function getAuthPassword(): string
     {
-        return [
-            // 'email_verified_at' => 'datetime',
-            'password' => 'hashed',
-        ];
+        return $this->mot_de_passe;
+    }
+
+    protected $casts = [
+        'role' => 'string',
+    ];
+
+    // -------------------------
+    // Helpers
+    // -------------------------
+
+    public function isClient(): bool
+    {
+        return $this->role === 'CLIENT';
+    }
+
+    public function isArtisan(): bool
+    {
+        return $this->role === 'ARTISAN';
+    }
+
+    public function isAdmin(): bool
+    {
+        return $this->role === 'ADMIN';
+    }
+
+    // -------------------------
+    // Relations
+    // -------------------------
+
+    /**
+     * Un utilisateur ARTISAN possède un profil artisan.
+     */
+    public function artisan(): HasOne
+    {
+        return $this->hasOne(Artisan::class, 'utilisateur_id');
     }
 
     /**
-     * Get the identifier that will be stored in the subject claim of the JWT.
-     *
-     * @return mixed
+     * Les rendez-vous demandés par ce client.
      */
-    public function getJWTIdentifier()
+    public function rendezVous(): HasMany
     {
-        return $this->getKey();
+        return $this->hasMany(RendezVous::class, 'client_id');
     }
 
     /**
-     * Return a key value array, containing any custom claims to be added to the JWT.
-     *
-     * @return array
+     * Les services demandés par ce client.
      */
-    public function getJWTCustomClaims()
+    public function services(): HasMany
     {
-        return [];
+        return $this->hasMany(Service::class, 'client_id');
     }
 
     /**
- * Relation avec le profil artisan
- */
-public function artisan()
-{
-    return $this->hasOne(Artisan::class);
-}
+     * Les services immédiats demandés par ce client.
+     */
+    public function servicesImmediats(): HasMany
+    {
+        return $this->hasMany(ServiceImmediat::class, 'client_id');
+    }
 
+    /**
+     * Les avis postés par ce client.
+     */
+    public function avis(): HasMany
+    {
+        return $this->hasMany(Avis::class, 'client_id');
+    }
+
+    /**
+     * Les notifications reçues par cet utilisateur.
+     */
+    public function notifications(): HasMany
+    {
+        return $this->hasMany(Notification::class, 'destinataire_id');
+    }
 }

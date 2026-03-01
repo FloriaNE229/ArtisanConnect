@@ -3,99 +3,81 @@
 namespace App\Http\Controllers;
 
 use App\Models\Offre;
-use App\Models\Atelier;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
+
 
 class OffreController extends Controller
 {
-    // Récupérer les offres de l'atelier de l'artisan
-    public function index()
+    /**
+     * Offres publiques d'un atelier.
+     * GET /api/ateliers/{id}/offres
+     */
+    public function index(int $atelierId): JsonResponse
     {
-        $offres = Offre::whereHas('atelier', function ($query) {
-            $query->where('user_id', Auth::id());
-        })->get();
+        $offres = Offre::where('atelier_id', $atelierId)
+            ->orderBy('titre')
+            ->get();
 
-        return response()->json($offres, 200);
+        return response()->json(['offres' => $offres]);
     }
 
-    // Créer une nouvelle offre
-    public function store(Request $request)
+    /**
+     * Créer une offre (artisan).
+     * POST /api/offres
+     */
+    public function store(Request $request): JsonResponse
     {
-        $validated = $request->validate([
-            'atelier_id' => 'required|exists:atelier,id',
-            'titre' => 'required|string|max:150',
-            'prix' => 'required|integer|min:0',
-            'description' => 'required|string',
-        ]);
+        $atelier = $request->user()->artisan?->atelier;
 
-        // Vérifier que l'atelier appartient à l'artisan
-        $atelier = Atelier::findOrFail($validated['atelier_id']);
-        if ($atelier->user_id !== Auth::id()) {
-            return response()->json(['message' => 'Non autorisé'], 403);
+        if (! $atelier) {
+            return response()->json(['message' => 'Créez d\'abord votre atelier.'], 422);
         }
 
-        $offre = Offre::create([
-            'verification_status' => 'pending',
-            ...$validated,
+        $data = $request->validate([
+            'titre'       => ['required', 'string', 'max:255'],
+            'description' => ['nullable', 'string'],
+            'prix'        => ['nullable', 'numeric', 'min:0'],
         ]);
 
+        $offre = $atelier->offres()->create($data);
+
         return response()->json([
-            'message' => 'Offre créée avec succès. En attente d\'approbation admin.',
-            'offre' => $offre,
+            'message' => 'Offre créée.',
+            'offre'   => $offre,
         ], 201);
     }
 
-    // Afficher une offre spécifique
-    public function show($id)
+    /**
+     * Modifier une offre (artisan).
+     * PUT /api/offres/{id}
+     */
+    public function update(Request $request, int $id): JsonResponse
     {
-        $offre = Offre::findOrFail($id);
+        $atelier = $request->user()->artisan?->atelier;
+        $offre   = Offre::where('atelier_id', $atelier?->id)->findOrFail($id);
 
-        // Vérifier les droits
-        if ($offre->atelier->user_id !== Auth::id() && Auth::user()->role !== 'ADMIN') {
-            return response()->json(['message' => 'Non autorisé'], 403);
-        }
-
-        return response()->json($offre, 200);
-    }
-
-    // Mettre à jour une offre
-    public function update(Request $request, $id)
-    {
-        $offre = Offre::findOrFail($id);
-
-        if ($offre->atelier->user_id !== Auth::id()) {
-            return response()->json(['message' => 'Non autorisé'], 403);
-        }
-
-        $validated = $request->validate([
-            'titre' => 'string|max:150',
-            'prix' => 'integer|min:0',
-            'description' => 'string',
+        $data = $request->validate([
+            'titre'       => ['sometimes', 'string', 'max:255'],
+            'description' => ['nullable', 'string'],
+            'prix'        => ['nullable', 'numeric', 'min:0'],
         ]);
 
-        // Réinitialiser le statut à "pending" après modification
-        $offre->update([
-            'verification_status' => 'pending',
-            ...$validated,
-        ]);
+        $offre->update($data);
 
-        return response()->json([
-            'message' => 'Offre mise à jour. En attente d\'approbation admin.',
-            'offre' => $offre,
-        ], 200);
+        return response()->json(['message' => 'Offre mise à jour.', 'offre' => $offre->fresh()]);
     }
 
-    // Supprimer une offre
-    public function destroy($id)
+    /**
+     * Supprimer une offre (artisan).
+     * DELETE /api/offres/{id}
+     */
+    public function destroy(Request $request, int $id): JsonResponse
     {
-        $offre = Offre::findOrFail($id);
-
-        if ($offre->atelier->user_id !== Auth::id()) {
-            return response()->json(['message' => 'Non autorisé'], 403);
-        }
-
+        $atelier = $request->user()->artisan?->atelier;
+        $offre   = Offre::where('atelier_id', $atelier?->id)->findOrFail($id);
         $offre->delete();
-        return response()->json(['message' => 'Offre supprimée'], 200);
+
+        return response()->json(['message' => 'Offre supprimée.']);
     }
 }
