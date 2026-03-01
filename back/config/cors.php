@@ -1,44 +1,24 @@
 <?php
 
 return [
-
-    /*
-    |--------------------------------------------------------------------------
-    | Cross-Origin Resource Sharing (CORS) Configuration
-    |--------------------------------------------------------------------------
-    |
-    | Here you may configure CORS settings for your application. This is
-    | configuration only and will not affect actual CORS handling by the
-    | framework.
-    |
-    */
-
     'paths' => ['api/*', 'sanctum/csrf-cookie'],
 
     'allowed_methods' => ['*'],
 
     'allowed_origins' => [
-        'http://localhost:5173',      // Vite dev server
-        'http://localhost:3000',      // Alternative port
-        'http://127.0.0.1:5173',
-        'http://127.0.0.1:3000',
+        'http://localhost:5173',   // Vite (React par défaut)
+        'http://localhost:3000',   // Create React App
+        'http://localhost:4173',   // Vite preview
+        // 'https://ton-domaine-production.com',  // ← ajouter en prod
     ],
 
-    'allowed_origins_patterns' => [
-        '#^http://localhost:\d+$#',
-        '#^http://127\.0\.0\.1:\d+$#',
-    ],
+    'allowed_origins_patterns' => [],
 
     'allowed_headers' => ['*'],
 
-    'exposed_headers' => [
-        'Authorization',
-        'Content-Length',
-        'X-JSON-Response',
-    ],
+    'exposed_headers' => [],
 
     'max_age' => 0,
 
-    'supports_credentials' => true,
-
+    'supports_credentials' => true,  // ← obligatoire pour Sanctum
 ];
