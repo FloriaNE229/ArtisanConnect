@@ -141,6 +141,9 @@ export const atelierAPI = {
   /** Détail d'un atelier */
   show: (id) => get(`/ateliers/${id}`),
 
+  /** Disponibilité d'un atelier */
+  disponibilite: (id) => get(`/ateliers/${id}/disponibilite`),
+
   /** Domaines / catégories disponibles */
   domaines: () => get("/domaines"),
 
