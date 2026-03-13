@@ -2,34 +2,39 @@ import { useState } from "react";
 import { Eye, EyeOff, Mail, Lock } from "lucide-react";
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from "../../components/Auth/AuthContext";
+import { authAPI } from "../../../../services/api";
 
 const Login = () => {
-    const navigate = useNavigate();
+    const navigate  = useNavigate();
     const { login } = useAuth();
 
     const [showPassword, setShowPassword] = useState(false);
-    const [loading, setLoading] = useState(false);
-    const [errors, setErrors] = useState({});
-    const [apiError, setApiError] = useState('');
+    const [loading,      setLoading]      = useState(false);
+    const [errors,       setErrors]       = useState({});
+    const [apiError,     setApiError]     = useState('');
 
     const [formData, setFormData] = useState({
-        email: '',
-        password: '',
+        email:        '',
+        mot_de_passe: '',
     });
 
     const handleChange = (e) => {
         const { name, value } = e.target;
         setFormData(prev => ({ ...prev, [name]: value }));
-        if (errors[name]) setErrors(prev => ({ ...prev, [name]: '' }));
-        if (apiError) setApiError('');
+        if (errors[name])  setErrors(prev => ({ ...prev, [name]: '' }));
+        if (apiError)      setApiError('');
     };
 
     const validate = () => {
         const newErrors = {};
-        if (!formData.email) newErrors.email = 'Email requis';
-        else if (!/\S+@\S+\.\S+/.test(formData.email)) newErrors.email = 'Email invalide';
-        if (!formData.password) newErrors.password = 'Mot de passe requis';
-        else if (formData.password.length < 6) newErrors.password = 'Minimum 6 caractères';
+        if (!formData.email)
+            newErrors.email = 'Email requis';
+        else if (!/\S+@\S+\.\S+/.test(formData.email))
+            newErrors.email = 'Email invalide';
+        if (!formData.mot_de_passe)
+            newErrors.mot_de_passe = 'Mot de passe requis';
+        else if (formData.mot_de_passe.length < 6)
+            newErrors.mot_de_passe = 'Minimum 6 caractères';
         return newErrors;
     };
 
@@ -46,46 +51,32 @@ const Login = () => {
         setApiError('');
 
         try {
-            // POST /auth/login
-            const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:8000/api'}/auth/login`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Accept': 'application/json',
-                },
-                body: JSON.stringify({
-                    email: formData.email,
-                    password: formData.password,
-                }),
+            // Utilise authAPI.login() depuis api.js
+            const data = await authAPI.login({
+                email:        formData.email,
+                mot_de_passe: formData.mot_de_passe,
             });
 
-            const data = await response.json();
-
-            if (!response.ok) {
-                if (data.errors) {
-                    const laravelErrors = {};
-                    Object.entries(data.errors).forEach(([key, msgs]) => {
-                        laravelErrors[key] = Array.isArray(msgs) ? msgs[0] : msgs;
-                    });
-                    setErrors(laravelErrors);
-                    return;
-                }
-                throw new Error(data.message || `Erreur ${response.status}`);
-            }
-
-            // Stocker dans le contexte Auth
+            // Stocke user + token dans le contexte (+ localStorage via AuthContext)
             login(data.user, data.token);
 
             // Redirection selon le rôle
-            if (data.user?.role === 'ADMIN') {
-                navigate('/admin/dashboard', { replace: true });
-            } else if (data.user?.role === 'ARTISAN') {
-                navigate('/profile', { replace: true });
-            } else {
-                navigate('/', { replace: true });
-            }
+            const role = data.user?.role;
+            if (role === 'ADMIN')        navigate('/admin/dashboard', { replace: true });
+            else if (role === 'ARTISAN') navigate('/profile',         { replace: true });
+            else                         navigate('/',                 { replace: true });
 
         } catch (err) {
+            // Erreurs de validation Laravel (422)
+            if (err.errors) {
+                const laravelErrors = {};
+                Object.entries(err.errors).forEach(([key, msgs]) => {
+                    laravelErrors[key] = Array.isArray(msgs) ? msgs[0] : msgs;
+                });
+                setErrors(laravelErrors);
+                return;
+            }
+            // Erreur générique (401, 403, 500…)
             setApiError(err.message || 'Email ou mot de passe incorrect');
         } finally {
             setLoading(false);
@@ -108,8 +99,8 @@ const Login = () => {
                 </div>
 
                 <div className="mb-4 text-center">
-                    <h1 className="mb-1 text-xl font-bold" style={{ color: '#2b2d42' }}>Bon retour</h1>
-                    <p className="text-sm" style={{ color: '#2b2d42', opacity: 0.7 }}>Connectez-vous à votre compte</p>
+                    <h1 className="mb-1 text-xl font-bold"  style={{ color: '#2b2d42' }}>Bon retour</h1>
+                    <p  className="text-sm"                 style={{ color: '#2b2d42', opacity: 0.7 }}>Connectez-vous à votre compte</p>
                 </div>
 
                 <div className="p-5 shadow-lg rounded-xl" style={{ border: '1px solid #e9ecef', backgroundColor: 'white' }}>
@@ -122,6 +113,7 @@ const Login = () => {
                     )}
 
                     <form onSubmit={handleSubmit}>
+
                         {/* Email */}
                         <div className="mb-4">
                             <label className="block mb-2 text-sm font-medium" style={{ color: '#2b2d42' }}>
@@ -138,15 +130,16 @@ const Login = () => {
                                     className="w-full py-3 pr-4 text-sm transition-all border rounded-lg outline-none pl-11 focus:ring-2"
                                     style={{
                                         backgroundColor: errors.email ? 'rgba(255, 126, 95, 0.05)' : '#f8f9fa',
-                                        borderColor: errors.email ? '#ff7e5f' : '#e9ecef',
+                                        borderColor:     errors.email ? '#ff7e5f' : '#e9ecef',
                                         color: '#2b2d42',
                                     }}
                                     onFocus={(e) => !errors.email && (e.target.style.borderColor = '#4a6fa5')}
-                                    onBlur={(e) => !errors.email && (e.target.style.borderColor = '#e9ecef')}
-                                    required
+                                    onBlur={(e)  => !errors.email && (e.target.style.borderColor = '#e9ecef')}
                                 />
                             </div>
-                            {errors.email && <p className="mt-2 text-sm font-semibold" style={{ color: '#ff7e5f' }}>{errors.email}</p>}
+                            {errors.email && (
+                                <p className="mt-2 text-sm font-semibold" style={{ color: '#ff7e5f' }}>{errors.email}</p>
+                            )}
                         </div>
 
                         {/* Mot de passe */}
@@ -161,30 +154,35 @@ const Login = () => {
                                 <Lock className="absolute w-5 h-5 -translate-y-1/2 left-3 top-1/2" style={{ color: '#ff7e5f' }} />
                                 <input
                                     type={showPassword ? "text" : "password"}
-                                    name="password"
-                                    value={formData.password}
+                                    name="mot_de_passe"
+                                    value={formData.mot_de_passe}
                                     onChange={handleChange}
                                     placeholder="••••••••"
                                     className="w-full py-3 pr-12 text-sm transition-all border rounded-lg outline-none pl-11 focus:ring-2"
                                     style={{
-                                        backgroundColor: errors.password ? 'rgba(255, 126, 95, 0.05)' : '#f8f9fa',
-                                        borderColor: errors.password ? '#ff7e5f' : '#e9ecef',
+                                        backgroundColor: errors.mot_de_passe ? 'rgba(255, 126, 95, 0.05)' : '#f8f9fa',
+                                        borderColor:     errors.mot_de_passe ? '#ff7e5f' : '#e9ecef',
                                         color: '#2b2d42',
                                     }}
-                                    onFocus={(e) => !errors.password && (e.target.style.borderColor = '#4a6fa5')}
-                                    onBlur={(e) => !errors.password && (e.target.style.borderColor = '#e9ecef')}
-                                    required
+                                    onFocus={(e) => !errors.mot_de_passe && (e.target.style.borderColor = '#4a6fa5')}
+                                    onBlur={(e)  => !errors.mot_de_passe && (e.target.style.borderColor = '#e9ecef')}
                                 />
-                                <button type="button" onClick={() => setShowPassword(!showPassword)}
+                                <button
+                                    type="button"
+                                    onClick={() => setShowPassword(!showPassword)}
                                     className="absolute transition-all -translate-y-1/2 right-3 top-1/2 hover:opacity-70"
                                     style={{ color: '#6b8cba' }}>
                                     {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
                                 </button>
                             </div>
-                            {errors.password && <p className="mt-2 text-sm font-semibold" style={{ color: '#ff7e5f' }}>{errors.password}</p>}
+                            {errors.mot_de_passe && (
+                                <p className="mt-2 text-sm font-semibold" style={{ color: '#ff7e5f' }}>{errors.mot_de_passe}</p>
+                            )}
                         </div>
 
-                        <button type="submit" disabled={loading}
+                        <button
+                            type="submit"
+                            disabled={loading}
                             className="w-full h-12 text-sm font-semibold text-white rounded-xl transition-all hover:shadow-lg hover:scale-[1.02] disabled:opacity-50 disabled:cursor-not-allowed"
                             style={{ background: 'linear-gradient(135deg, #4a6fa5, #3a5784)' }}>
                             {loading ? (
