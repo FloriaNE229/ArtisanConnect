@@ -23,7 +23,7 @@ export default function ServiceImmediate() {
   const [errors,        setErrors]        = useState({});
 
   const [formData, setFormData] = useState({
-    category: '', description: '', address: '', city: '', phone: '',
+    domaine: '', description: '', localisation: '', ville: '', phone: '',
   });
 
   const handleChange = (e) => {
@@ -34,16 +34,15 @@ export default function ServiceImmediate() {
 
   const validate = () => {
     const e = {};
-    if (!formData.category) e.category = 'Catégorie requise';
+    if (!formData.domaine) e.domaine = 'Catégorie requise';
     if (!formData.description || formData.description.trim().length < 10)
       e.description = 'Description requise (min 10 caractères)';
-    if (!formData.address) e.address = 'Adresse requise';
-    if (!formData.city)    e.city    = 'Ville requise';
-    if (!formData.phone)   e.phone   = 'Téléphone requis';
+    if (!formData.localisation) e.localisation = 'Adresse requise';
+    if (!formData.ville)        e.ville        = 'Ville requise';
+    if (!formData.phone)        e.phone        = 'Téléphone requis';
     return e;
   };
 
-  // ── POST /services-immediats ───────────────────────────────
   const handleSubmit = async (e) => {
     e.preventDefault();
     const newErrors = validate();
@@ -53,7 +52,9 @@ export default function ServiceImmediate() {
     setSearching(true);
 
     try {
-      const data = await serviceImmediatAPI.store(formData); // POST /services-immediats
+      // Envoi directement les bons champs au backend
+      const payload = { ...formData };
+      const data = await serviceImmediatAPI.store(payload);
 
       const list = data.artisans ?? data.data ?? data ?? [];
       setArtisansFound(Array.isArray(list) ? list : []);
@@ -74,8 +75,6 @@ export default function ServiceImmediate() {
     }
   };
 
-  // ── GET /services-immediats/disponibles ───────────────────
-  // (optionnel : charger les artisans dispo avant soumission)
   const handleContactArtisan = (artisanId) => {
     navigate(`/artisan/${artisanId}`);
   };
@@ -110,7 +109,6 @@ export default function ServiceImmediate() {
         </div>
 
         {!searching ? (
-          /* ── Formulaire ── */
           <Card className="p-8">
             {errors.submit && (
               <div className="p-4 mb-6 rounded-xl"
@@ -140,20 +138,20 @@ export default function ServiceImmediate() {
                 <div className="grid grid-cols-2 gap-3 md:grid-cols-3">
                   {CATEGORIES.map(cat => (
                     <button key={cat.value} type="button"
-                      onClick={() => handleChange({ target: { name: 'category', value: cat.value } })}
+                      onClick={() => handleChange({ target: { name: 'domaine', value: cat.value } })}
                       className="p-4 text-sm font-bold transition-all rounded-xl"
                       style={{
-                        backgroundColor: formData.category === cat.value ? 'var(--primary)' : 'white',
-                        color:           formData.category === cat.value ? 'white' : 'var(--dark)',
-                        border: `2px solid ${formData.category === cat.value ? 'var(--primary)' : 'var(--gray-dark)'}`,
+                        backgroundColor: formData.domaine === cat.value ? 'var(--primary)' : 'white',
+                        color:           formData.domaine === cat.value ? 'white' : 'var(--dark)',
+                        border: `2px solid ${formData.domaine === cat.value ? 'var(--primary)' : 'var(--gray-dark)'}`,
                       }}>
                       <div className="mb-2 text-2xl">{cat.icon}</div>
                       {cat.label}
                     </button>
                   ))}
                 </div>
-                {errors.category && (
-                  <p className="mt-2 text-sm font-semibold" style={{ color: '#ef4444' }}>{errors.category}</p>
+                {errors.domaine && (
+                  <p className="mt-2 text-sm font-semibold" style={{ color: '#ef4444' }}>{errors.domaine}</p>
                 )}
               </div>
 
@@ -176,12 +174,12 @@ export default function ServiceImmediate() {
               </div>
 
               <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
-                <Input label="Adresse *" name="address" value={formData.address}
+                <Input label="Adresse *" name="localisation" value={formData.localisation}
                   onChange={handleChange} icon={MapPin} placeholder="Rue, quartier..."
-                  error={errors.address} />
-                <Input label="Ville *" name="city" value={formData.city}
+                  error={errors.localisation} />
+                <Input label="Ville *" name="ville" value={formData.ville}
                   onChange={handleChange} icon={MapPin} placeholder="Ex: Cotonou"
-                  error={errors.city} />
+                  error={errors.ville} />
               </div>
 
               <Input label="Téléphone *" name="phone" type="tel" value={formData.phone}
@@ -206,7 +204,7 @@ export default function ServiceImmediate() {
           </Card>
 
         ) : (
-          /* ── Résultats ── */
+          /* Résultats */
           <div className="space-y-6">
             {loading ? (
               <Card className="p-12 text-center">
