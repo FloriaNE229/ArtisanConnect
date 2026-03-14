@@ -155,6 +155,16 @@ class ServiceImmediatController extends Controller
 
         $si->update(['statut' => 'ANNULE']);
 
+        if ($si->artisan_acceptant_id) {
+            $this->notifService->envoyer(
+                $si->artisanAcceptant->utilisateur_id,
+                'service_immediat_annule',
+                "Le client {$si->client->prenom} {$si->client->nom} a annulé son service immédiat #{$si->id}.",
+                $si->id,
+                'services_immediats'
+            );
+        }
+
         return response()->json(['message' => 'Service immédiat annulé.']);
     }
 }

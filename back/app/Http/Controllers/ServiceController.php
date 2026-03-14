@@ -166,6 +166,14 @@ class ServiceController extends Controller
 
         $service->update(['statut' => 'ANNULE']);
 
+        $this->notifService->envoyer(
+            $service->atelier->artisan->utilisateur_id,
+            'service_annule',
+            "Le client {$service->client->prenom} {$service->client->nom} a annulé son service #{$service->id}.",
+            $service->id,
+            'services'
+        );
+
         return response()->json(['message' => 'Service annulé.', 'service' => $service]);
     }
 
