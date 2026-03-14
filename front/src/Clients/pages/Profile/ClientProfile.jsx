@@ -5,20 +5,23 @@ import {
   FileText, Clock, Award, LogOut, Shield, Hammer,
   Briefcase, Store, Plus, Loader, ChevronRight
 } from 'lucide-react';
-import { useAuth }   from '../../components/Auth/AuthContext';
-import { profilAPI, atelierAPI } from '../../../../services/api';
+import { useAuth } from '../../components/Auth/AuthContext';
+import { profilAPI, atelierAPI, rendezVousAPI } from '../../../../services/api';
 
 export default function ClientProfile() {
   const { user, logout, loading, token } = useAuth();
   const location = useLocation();
   const navigate  = useNavigate();
 
-  const [activeTab,   setActiveTab]   = useState('overview');
-  const [atelier,     setAtelier]     = useState(null);
+  const [activeTab, setActiveTab] = useState('overview');
+  const [atelier, setAtelier] = useState(null);
   const [atelierLoad, setAtelierLoad] = useState(false);
+
   const [profileData, setProfileData] = useState(null);
   const [profileLoad, setProfileLoad] = useState(false);
-  const [profileErr,  setProfileErr]  = useState(null);
+  const [profileErr, setProfileErr] = useState(null);
+
+  const [appointmentsCount, setAppointmentsCount] = useState(0);
 
   const isNewRegistration = location.state?.newRegistration;
   const isArtisan         = user?.role === 'ARTISAN';
@@ -31,8 +34,17 @@ export default function ClientProfile() {
       setProfileLoad(true);
       setProfileErr(null);
       try {
-        const data = await profilAPI.show();       // GET /profil
+        const data = await profilAPI.show();
         setProfileData(data.user ?? data);
+
+        // ── Récupérer le nombre de rendez-vous selon le rôle
+        if (user.role === 'CLIENT') {
+          const rdvs = await rendezVousAPI.index();
+          setAppointmentsCount(rdvs.rendez_vous.total ?? 0);
+        } else if (user.role === 'ARTISAN') {
+          const rdvs = await rendezVousAPI.indexArtisan();
+          setAppointmentsCount(rdvs.rendez_vous.total ?? 0);
+        }
       } catch (err) {
         setProfileErr(err.message || 'Erreur lors du chargement du profil.');
       } finally {
@@ -50,10 +62,9 @@ export default function ClientProfile() {
     const fetchAtelier = async () => {
       setAtelierLoad(true);
       try {
-        const data = await atelierAPI.monAtelier(); // GET /mon-atelier
+        const data = await atelierAPI.monAtelier();
         setAtelier(data.atelier ?? data ?? null);
       } catch {
-        // Pas d'atelier = normal pour un nouvel artisan
         setAtelier(null);
       } finally {
         setAtelierLoad(false);
@@ -63,7 +74,7 @@ export default function ClientProfile() {
     fetchAtelier();
   }, [user, isArtisan, token]);
 
-  // ── États de chargement ────────────────────────────────────
+  // ── États de chargement / erreurs ─────────────────────────
   if (loading || profileLoad) return (
     <div className="flex items-center justify-center min-h-screen">
       <Loader className="w-12 h-12 animate-spin" style={{ color: '#4a6fa5' }} />
@@ -100,7 +111,13 @@ export default function ClientProfile() {
   const fullName = `${profile.prenom ?? ''} ${profile.nom ?? ''}`.trim() || profile.email;
   const initiale = fullName.charAt(0).toUpperCase();
   const photo    = profile.photo_profil ?? profile.photo ?? null;
-  const stats    = profile.stats ?? { services: 0, appointments: 0, reviews: 0 };
+
+  const stats    = {
+    services: profile.stats?.services ?? 0,
+    appointments: appointmentsCount,
+    reviews: profile.stats?.reviews ?? 0,
+    rating: profile.rating ?? null
+  };
 
   const handleLogout = () => { logout(); navigate('/'); };
 
@@ -199,7 +216,7 @@ export default function ClientProfile() {
             { label: 'Services',    value: stats.services    ?? 0, color: '#ff7e5f', Icon: FileText },
             { label: 'Rendez-vous', value: stats.appointments ?? 0, color: '#4a6fa5', Icon: Calendar },
             { label: 'Avis',        value: stats.reviews     ?? 0, color: '#f59e0b', Icon: Star     },
-            ...(isArtisan ? [{ label: 'Note moy.', value: profile.rating ? Number(profile.rating).toFixed(1) : '—', color: '#22c55e', Icon: Award }] : []),
+            ...(isArtisan ? [{ label: 'Note moy.', value: stats.rating ? Number(stats.rating).toFixed(1) : '—', color: '#22c55e', Icon: Award }] : []),
           ].map(({ label, value, color, Icon }) => (
             <div key={label} className="relative p-6 overflow-hidden transition-all duration-300 bg-white shadow-lg rounded-2xl hover:shadow-xl hover:-translate-y-1">
               <div className="relative flex items-center justify-between">

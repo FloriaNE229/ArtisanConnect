@@ -11,26 +11,28 @@ export default function NotificationsList() {
   const [unreadCount,   setUnreadCount]   = useState(0);
 
   // ── GET /notifications ─────────────────────────────────────
-  const fetchNotifications = useCallback(async () => {
-    setLoading(true);
-    setError(null);
-    try {
-      const data = await notificationAPI.index();
-      const list = data.notifications ?? data.data ?? [];
+const fetchNotifications = useCallback(async () => {
+  setLoading(true);
+  setError(null);
+  try {
+    const data = await notificationAPI.index();
 
-      // Filtre côté client (le back peut aussi gérer ?filter=)
-      const filtered = filter === 'all'
-        ? list
-        : list.filter(n => filter === 'unread' ? !n.lu && !n.read : n.lu || n.read);
+    // Récupérer la liste réelle
+    const raw = data.notifications ?? data.data ?? [];
+    const list = Array.isArray(raw) ? raw : raw.data ?? [];
 
-      setNotifications(filtered);
-      setUnreadCount(data.unread_count ?? list.filter(n => !n.lu && !n.read).length);
-    } catch (err) {
-      setError(err.message || 'Erreur lors du chargement.');
-    } finally {
-      setLoading(false);
-    }
-  }, [filter]);
+    const filtered = filter === 'all'
+      ? list
+      : list.filter(n => filter === 'unread' ? !n.lu && !n.read : n.lu || n.read);
+
+    setNotifications(filtered);
+    setUnreadCount(data.unread_count ?? list.filter(n => !n.lu && !n.read).length);
+  } catch (err) {
+    setError(err.message || 'Erreur lors du chargement.');
+  } finally {
+    setLoading(false);
+  }
+}, [filter]);
 
   useEffect(() => { fetchNotifications(); }, [fetchNotifications]);
 
