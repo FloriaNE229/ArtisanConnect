@@ -5,7 +5,6 @@ import { rendezVousAPI, authAPI } from "../../../../services/api";
 import Card   from "../../components/Common/Card";
 import Button from "../../components/Common/Button";
 
-// Helper statut compatible FR/EN
 const getStatut = (r) => r.statut ?? r.status ?? "EN_ATTENTE";
 
 const STATUS_STYLES = {
@@ -26,21 +25,19 @@ function StatusBadge({ statut }) {
 }
 
 export default function MyAppointments() {
-  const [userRole,    setUserRole]    = useState(null);
-  const [rdvs,        setRdvs]        = useState([]);
-  const [loading,     setLoading]     = useState(true);
-  const [error,       setError]       = useState(null);
-  const [filterStatut,setFilterStatut]= useState("all");
-  const [pagination,  setPagination]  = useState({ current_page: 1, last_page: 1 });
+  const [userRole,     setUserRole]     = useState(null);
+  const [rdvs,         setRdvs]         = useState([]);
+  const [loading,      setLoading]      = useState(true);
+  const [error,        setError]        = useState(null);
+  const [filterStatut, setFilterStatut] = useState("all");
+  const [pagination,   setPagination]   = useState({ current_page: 1, last_page: 1 });
 
-  // ── Récupérer le rôle ─────────────────────────────────────
   useEffect(() => {
     authAPI.me()
       .then(data => setUserRole(data.user?.role ?? data.role))
       .catch(err => setError(err.message || "Impossible de récupérer le profil"));
   }, []);
 
-  // ── Récupérer les rendez-vous ─────────────────────────────
   const fetchRdvs = async (page = 1) => {
     if (!userRole) return;
     setLoading(true);
@@ -50,7 +47,6 @@ export default function MyAppointments() {
         ? await rendezVousAPI.index()
         : await rendezVousAPI.indexArtisan();
 
-      // Compatible réponse paginée ou simple liste
       const raw = data.rendez_vous ?? data.data ?? data ?? [];
       if (raw?.data) {
         setRdvs(raw.data);
@@ -68,7 +64,6 @@ export default function MyAppointments() {
 
   useEffect(() => { fetchRdvs(); }, [userRole]);
 
-  // ── Actions ───────────────────────────────────────────────
   const handleAnnuler = async (id) => {
     if (!window.confirm("Annuler ce rendez-vous ?")) return;
     try {
@@ -94,8 +89,7 @@ export default function MyAppointments() {
     } catch (err) { alert(err.message || "Erreur lors du refus"); }
   };
 
-  // ── Filtres ───────────────────────────────────────────────
-  const countBy = (val) => rdvs.filter(r => getStatut(r) === val).length;
+  const countBy  = (val) => rdvs.filter(r => getStatut(r) === val).length;
   const filtered = filterStatut === "all" ? rdvs : rdvs.filter(r => getStatut(r) === filterStatut);
 
   const now      = new Date();
@@ -111,7 +105,6 @@ export default function MyAppointments() {
     return isNaN(d) ? "—" : d.toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" });
   };
 
-  // ── Nom affiché selon le rôle ─────────────────────────────
   const getDisplayName = (rdv) => {
     if (userRole === "CLIENT") {
       return (rdv.atelier?.nom ?? `${rdv.artisan?.prenom ?? ""} ${rdv.artisan?.nom ?? ""}`.trim()) || "Artisan";
@@ -126,19 +119,16 @@ export default function MyAppointments() {
 
   const getInitiale = (rdv) => getDisplayName(rdv).charAt(0).toUpperCase();
 
-  // ── Carte rendez-vous ─────────────────────────────────────
   const RdvCard = ({ rdv, dimmed = false }) => {
     const statut = getStatut(rdv);
     return (
       <Card hover className={`p-6 ${dimmed ? "opacity-70" : ""}`}>
         <div className="flex flex-col gap-6 md:flex-row">
 
-          {/* Avatar / Image */}
           <div className="flex-shrink-0 w-full overflow-hidden md:w-28 h-28 rounded-xl"
             style={{ backgroundColor: "var(--gray)" }}>
             {getAvatar(rdv) ? (
-              <img src={getAvatar(rdv)} alt={getDisplayName(rdv)}
-                className="object-cover w-full h-full" />
+              <img src={getAvatar(rdv)} alt={getDisplayName(rdv)} className="object-cover w-full h-full" />
             ) : (
               <div className="flex items-center justify-center w-full h-full text-3xl font-black text-white"
                 style={{ background: "linear-gradient(135deg, var(--primary), var(--primary-light))" }}>
@@ -158,7 +148,7 @@ export default function MyAppointments() {
                     {rdv.atelier.domaine}
                   </p>
                 )}
-                {rdv.description ?? rdv.motif ? (
+                {(rdv.description ?? rdv.motif) ? (
                   <p className="text-sm" style={{ color: "var(--dark)", opacity: 0.7 }}>
                     {rdv.description ?? rdv.motif}
                   </p>
@@ -167,7 +157,6 @@ export default function MyAppointments() {
               <StatusBadge statut={statut} />
             </div>
 
-            {/* Infos date / durée / lieu */}
             <div className="grid grid-cols-2 gap-3 p-4 mb-4 md:grid-cols-3 rounded-xl"
               style={{ backgroundColor: "var(--gray)" }}>
               <div className="flex items-center gap-2">
@@ -194,7 +183,7 @@ export default function MyAppointments() {
                 </div>
               )}
               {rdv.adresse && (
-                <div className="flex items-center gap-2 col-span-2 md:col-span-1">
+                <div className="flex items-center col-span-2 gap-2 md:col-span-1">
                   <MapPin className="flex-shrink-0 w-4 h-4" style={{ color: "var(--primary)" }} />
                   <div>
                     <div className="text-xs" style={{ color: "var(--dark)", opacity: 0.6 }}>Lieu</div>
@@ -204,10 +193,7 @@ export default function MyAppointments() {
               )}
             </div>
 
-            {/* Actions */}
             <div className="flex flex-wrap gap-3">
-
-              {/* CLIENT — annuler si en attente */}
               {userRole === "CLIENT" && statut === "EN_ATTENTE" && (
                 <Button variant="outline" className="!px-4 !py-2 !text-sm"
                   style={{ color: "#ef4444", borderColor: "#ef4444" }}
@@ -215,8 +201,6 @@ export default function MyAppointments() {
                   Annuler
                 </Button>
               )}
-
-              {/* CLIENT — laisser un avis si passé et accepté */}
               {userRole === "CLIENT" && statut === "ACCEPTE" && !dimmed === false && (
                 <Link to={`/reviews/write/${rdv.atelier?.id ?? rdv.atelier_id}`}>
                   <Button variant="secondary" className="!px-4 !py-2 !text-sm">
@@ -224,8 +208,6 @@ export default function MyAppointments() {
                   </Button>
                 </Link>
               )}
-
-              {/* ARTISAN — accepter / refuser */}
               {userRole === "ARTISAN" && statut === "EN_ATTENTE" && (
                 <>
                   <Button variant="primary" className="!px-4 !py-2 !text-sm"
@@ -246,7 +228,6 @@ export default function MyAppointments() {
     );
   };
 
-  // ── Pagination ────────────────────────────────────────────
   const goToPage = (page) => {
     if (page < 1 || page > pagination.last_page) return;
     fetchRdvs(page);
@@ -256,7 +237,7 @@ export default function MyAppointments() {
     <div className="min-h-screen pt-24 pb-20" style={{ backgroundColor: "var(--light)" }}>
       <div className="px-4 mx-auto max-w-7xl sm:px-6 lg:px-8">
 
-        {/* ── Header ── */}
+        {/* Header */}
         <div className="mb-10">
           <div className="inline-flex items-center gap-2 px-4 py-2 mb-6 text-sm font-semibold rounded-full"
             style={{ backgroundColor: "rgba(74,111,165,0.1)", color: "var(--primary)" }}>
@@ -272,30 +253,22 @@ export default function MyAppointments() {
             </span>
           </h1>
 
-          <p className="mb-6 text-lg" style={{ color: "var(--dark)", opacity: 0.7 }}>
+          <p className="text-lg" style={{ color: "var(--dark)", opacity: 0.7 }}>
             {userRole === "ARTISAN"
               ? "Gérez les rendez-vous de vos clients"
               : "Suivez et gérez vos rendez-vous avec les artisans"}
           </p>
-
-          {userRole === "CLIENT" && (
-            <Link to="/appointments/book">
-              <Button variant="primary">
-                <Calendar className="w-4 h-4" /> Prendre un rendez-vous
-              </Button>
-            </Link>
-          )}
         </div>
 
-        {/* ── Filtres ── */}
+        {/* Filtres */}
         <Card className="mb-8">
           <div className="flex flex-wrap gap-2">
             {[
-              { value: "all",        label: "Tous",       count: rdvs.length          },
+              { value: "all",        label: "Tous",       count: rdvs.length           },
               { value: "EN_ATTENTE", label: "En attente", count: countBy("EN_ATTENTE") },
-              { value: "ACCEPTE",    label: "Confirmés",  count: countBy("ACCEPTE")   },
-              { value: "REFUSE",     label: "Refusés",    count: countBy("REFUSE")    },
-              { value: "ANNULE",     label: "Annulés",    count: countBy("ANNULE")    },
+              { value: "ACCEPTE",    label: "Confirmés",  count: countBy("ACCEPTE")    },
+              { value: "REFUSE",     label: "Refusés",    count: countBy("REFUSE")     },
+              { value: "ANNULE",     label: "Annulés",    count: countBy("ANNULE")     },
             ].map(f => (
               <button key={f.value} onClick={() => setFilterStatut(f.value)}
                 className="px-4 py-2 text-sm font-bold transition-all rounded-lg"
@@ -310,7 +283,7 @@ export default function MyAppointments() {
           </div>
         </Card>
 
-        {/* ── États ── */}
+        {/* États */}
         {error && (
           <Card className="py-10 mb-8 text-center">
             <p className="mb-4 font-semibold" style={{ color: "#e74c3c" }}>⚠️ {error}</p>
@@ -330,19 +303,14 @@ export default function MyAppointments() {
               <AlertCircle className="w-10 h-10" style={{ color: "var(--primary)" }} />
             </div>
             <h3 className="mb-3 text-2xl font-bold" style={{ color: "var(--dark)" }}>Aucun rendez-vous</h3>
-            <p className="mb-6 text-sm" style={{ color: "var(--dark)", opacity: 0.7 }}>
+            <p className="text-sm" style={{ color: "var(--dark)", opacity: 0.7 }}>
               {userRole === "ARTISAN"
                 ? "Aucun rendez-vous reçu pour l'instant."
                 : "Vous n'avez pas encore de rendez-vous planifié."}
             </p>
-            {userRole === "CLIENT" && (
-              <Link to="/appointments/book"><Button>Prendre un rendez-vous</Button></Link>
-            )}
           </Card>
         ) : (
           <div className="space-y-8">
-
-            {/* À venir */}
             {upcoming.length > 0 && (
               <div>
                 <h2 className="flex items-center gap-2 mb-4 text-2xl font-bold" style={{ color: "var(--dark)" }}>
@@ -354,8 +322,6 @@ export default function MyAppointments() {
                 </div>
               </div>
             )}
-
-            {/* Passés */}
             {past.length > 0 && (
               <div>
                 <h2 className="flex items-center gap-2 mb-4 text-2xl font-bold"
@@ -371,7 +337,7 @@ export default function MyAppointments() {
           </div>
         )}
 
-        {/* ── Pagination ── */}
+        {/* Pagination */}
         {pagination.last_page > 1 && (
           <div className="flex items-center justify-center gap-2 mt-10">
             <button
@@ -381,10 +347,9 @@ export default function MyAppointments() {
               style={{ borderColor: "var(--primary)", color: "var(--primary)" }}>
               <ChevronLeft className="w-5 h-5" />
             </button>
-
             {Array.from({ length: pagination.last_page }, (_, i) => i + 1).map(page => (
               <button key={page} onClick={() => goToPage(page)}
-                className="flex items-center justify-center w-10 h-10 text-sm font-bold border-2 rounded-xl transition-all"
+                className="flex items-center justify-center w-10 h-10 text-sm font-bold transition-all border-2 rounded-xl"
                 style={{
                   backgroundColor: page === pagination.current_page ? "var(--primary)" : "white",
                   color:           page === pagination.current_page ? "white" : "var(--dark)",
@@ -393,7 +358,6 @@ export default function MyAppointments() {
                 {page}
               </button>
             ))}
-
             <button
               disabled={pagination.current_page === pagination.last_page}
               onClick={() => goToPage(pagination.current_page + 1)}
@@ -403,6 +367,7 @@ export default function MyAppointments() {
             </button>
           </div>
         )}
+
       </div>
     </div>
   );

@@ -1,17 +1,17 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Wrench, PlugZap, Hammer, Paintbrush, HardHat, KeyRound } from 'lucide-react';
-import { GiSewingNeedle, GiScissors } from 'react-icons/gi';
+import { Wrench, Zap, Hammer, Paintbrush, HardHat, Shirt, Scissors, KeyRound } from 'lucide-react';
+//import { GiSewingNeedle, GiScissors } from 'react-icons/gi';
 
 const CATEGORIES = [
-  { name: 'Plomberie',   value: 'Plomberie',   color: '#3b82f6', icon: Wrench         },
-  { name: 'Électricité', value: 'Électricité', color: '#eab308', icon: PlugZap         },
-  { name: 'Menuiserie',  value: 'Menuiserie',  color: '#f97316', icon: Hammer          },
-  { name: 'Peinture',    value: 'Peinture',    color: '#ec4899', icon: Paintbrush      },
-  { name: 'Maçonnerie',  value: 'Maçonnerie',  color: '#ef4444', icon: HardHat         },
-  { name: 'Couture',     value: 'Couture',     color: '#a855f7', icon: GiSewingNeedle  },
-  { name: 'Coiffure',    value: 'Coiffure',    color: '#22c55e', icon: GiScissors      },
-  { name: 'Mécanique',   value: 'Mécanique',   color: '#6b7280', icon: KeyRound        },
+  { name: 'Plomberie', value: 'Plomberie', icon: Wrench },
+  { name: 'Électricité', value: 'Électricité', icon: Zap },
+  { name: 'Menuiserie', value: 'Menuiserie', icon: Hammer },
+  { name: 'Peinture', value: 'Peinture', icon: Paintbrush },
+  { name: 'Maçonnerie', value: 'Maçonnerie', icon: HardHat },
+  { name: 'Couture', value: 'Couture', icon: Shirt },
+  { name: 'Coiffure', value: 'Coiffure', icon: Scissors },
+  { name: 'Mécanique', value: 'Mécanique', icon: KeyRound },
 ];
 
 export default function CategoriesGrid() {
@@ -100,7 +100,7 @@ export default function CategoriesGrid() {
                   </span>
                 )}
                 {loading && (
-                  <span className="w-12 h-4 rounded-full animate-pulse bg-gray-100" />
+                  <span className="w-12 h-4 bg-gray-100 rounded-full animate-pulse" />
                 )}
               </button>
             );

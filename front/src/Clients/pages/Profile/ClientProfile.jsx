@@ -36,19 +36,22 @@ export default function ClientProfile() {
       try {
         const data = await profilAPI.show();
         setProfileData(data.user ?? data);
-
-        // ── Récupérer le nombre de rendez-vous selon le rôle
-        if (user.role === 'CLIENT') {
-          const rdvs = await rendezVousAPI.index();
-          setAppointmentsCount(rdvs.rendez_vous.total ?? 0);
-        } else if (user.role === 'ARTISAN') {
-          const rdvs = await rendezVousAPI.indexArtisan();
-          setAppointmentsCount(rdvs.rendez_vous.total ?? 0);
-        }
       } catch (err) {
         setProfileErr(err.message || 'Erreur lors du chargement du profil.');
       } finally {
         setProfileLoad(false);
+      }
+
+      try {
+        if (user.role === 'CLIENT') {
+          const rdvs = await rendezVousAPI.index();
+          setAppointmentsCount(rdvs.rendez_vous?.total ?? rdvs.total ?? 0);
+        } else if (user.role === 'ARTISAN') {
+          const rdvs = await rendezVousAPI.indexArtisan();
+          setAppointmentsCount(rdvs.rendez_vous?.total ?? rdvs.total ?? 0);
+        }
+      } catch {
+        setAppointmentsCount(0);
       }
     };
 
@@ -112,11 +115,17 @@ export default function ClientProfile() {
   const initiale = fullName.charAt(0).toUpperCase();
   const photo    = profile.photo_profil ?? profile.photo ?? null;
 
-  const stats    = {
-    services: profile.stats?.services ?? 0,
+  const artisanProfile  = profile.artisan ?? null;
+  const specialite      = artisanProfile?.specialite       ?? profile.specialite       ?? null;
+  const experienceLevel = artisanProfile?.experience_level ?? profile.experience_level ?? null;
+  const bio             = artisanProfile?.bio              ?? profile.bio              ?? null;
+  const telephone       = artisanProfile?.telephone        ?? profile.telephone        ?? null;
+
+  const stats = {
+    services:     profile.stats?.services ?? 0,
     appointments: appointmentsCount,
-    reviews: profile.stats?.reviews ?? 0,
-    rating: profile.rating ?? null
+    reviews:      profile.stats?.reviews  ?? 0,
+    rating:       profile.rating          ?? null,
   };
 
   const handleLogout = () => { logout(); navigate('/'); };
@@ -176,7 +185,7 @@ export default function ClientProfile() {
                   </span>
                 )}
               </div>
-              <p className="mb-4 text-lg text-white/80">Membre ArtisanConnect</p>
+              <p className="mb-4 text-lg text-white/80">Membre DigitalArt</p>
               <div className="flex flex-wrap items-center justify-center gap-3 md:justify-start">
                 {profile.created_at && (
                   <span className="inline-flex items-center gap-1.5 px-4 py-2 text-sm font-semibold text-white rounded-full bg-white/20">
@@ -184,10 +193,10 @@ export default function ClientProfile() {
                     Membre depuis {new Date(profile.created_at).getFullYear()}
                   </span>
                 )}
-                {isArtisan && profile.specialite && (
+                {isArtisan && specialite && (
                   <span className="inline-flex items-center gap-1.5 px-4 py-2 text-sm font-semibold text-white rounded-full bg-white/20">
                     <Briefcase className="w-4 h-4" />
-                    {profile.specialite.charAt(0).toUpperCase() + profile.specialite.slice(1)}
+                    {specialite.charAt(0).toUpperCase() + specialite.slice(1)}
                   </span>
                 )}
               </div>
@@ -311,7 +320,7 @@ export default function ClientProfile() {
               <p className="text-lg text-white/90">
                 {isArtisan
                   ? "Vous faites partie de notre réseau d'artisans professionnels"
-                  : "Vous êtes un membre actif de la communauté ArtisanConnect"}
+                  : "Vous êtes un membre actif de la communauté DigitalArt "}
               </p>
               {isArtisan && !atelier && (
                 <button onClick={() => navigate('/atelier/create')}
@@ -337,12 +346,12 @@ export default function ClientProfile() {
             </div>
             <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
               {[
-                { Icon: User,      label: 'Nom complet', value: fullName,                        show: true      },
-                { Icon: Mail,      label: 'Email',        value: profile.email,                   show: true      },
-                { Icon: Phone,     label: 'Téléphone',    value: profile.telephone ?? '—',        show: true      },
-                { Icon: Briefcase, label: 'Spécialité',   value: profile.specialite ?? '—',       show: isArtisan },
-                { Icon: Award,     label: 'Expérience',   value: profile.experience_level ?? '—', show: isArtisan },
-                { Icon: FileText,  label: 'Bio',          value: profile.bio ?? '—',              show: isArtisan },
+                { Icon: User,      label: 'Nom complet', value: fullName,               show: true      },
+                { Icon: Mail,      label: 'Email',        value: profile.email,          show: true      },
+                { Icon: Phone,     label: 'Téléphone',    value: telephone ?? '—',       show: true      },
+                { Icon: Briefcase, label: 'Spécialité',   value: specialite ?? '—',      show: isArtisan },
+                { Icon: Award,     label: 'Expérience',   value: experienceLevel ?? '—', show: isArtisan },
+                { Icon: FileText,  label: 'Bio',          value: bio ?? '—',             show: isArtisan },
               ].filter(f => f.show).map(({ Icon, label, value }) => (
                 <div key={label} className="p-6 transition-all duration-300 border-2 border-gray-200 rounded-xl hover:border-blue-400 hover:shadow-md">
                   <div className="flex items-start gap-4">

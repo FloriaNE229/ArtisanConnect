@@ -1,5 +1,18 @@
 import { useState, useEffect } from 'react';
-import { Filter, Clock, CheckCircle, XCircle, AlertCircle, Eye } from 'lucide-react';
+import {
+  Filter,
+  Clock,
+  CheckCircle,
+  XCircle,
+  AlertCircle,
+  Eye,
+  ListChecks,
+  CalendarDays,
+  Wallet,
+  Siren,
+  Hash,
+  RefreshCw
+} from 'lucide-react';
 import { Link } from 'react-router-dom';
 import Card   from '../../components/Common/Card';
 import Button from '../../components/Common/Button';
@@ -73,17 +86,17 @@ export default function MyServices() {
   // ── Badge statut ───────────────────────────────────────────
   const getStatusBadge = (statut) => {
     const styles = {
-      EN_ATTENTE: { bg: 'rgba(251,146,60,0.1)',  color: '#fb923c',        Icon: Clock,        label: 'En attente' },
-      ACCEPTE:    { bg: 'rgba(74,111,165,0.1)',  color: 'var(--primary)', Icon: CheckCircle,  label: 'Accepté'    },
-      REFUSE:     { bg: 'rgba(239,68,68,0.1)',   color: '#ef4444',        Icon: XCircle,      label: 'Refusé'     },
-      TERMINE:    { bg: 'rgba(34,197,94,0.1)',   color: '#22c55e',        Icon: CheckCircle,  label: 'Terminé'    },
-      ANNULE:     { bg: 'rgba(107,114,128,0.1)', color: '#6b7280',        Icon: XCircle,      label: 'Annulé'     },
+      EN_ATTENTE: { bg: 'bg-amber-50',   color: 'text-amber-600',   Icon: Clock,       label: 'En attente' },
+      ACCEPTE:    { bg: 'bg-blue-50',    color: 'text-blue-600',    Icon: CheckCircle, label: 'Accepté'    },
+      REFUSE:     { bg: 'bg-red-50',     color: 'text-red-600',     Icon: XCircle,     label: 'Refusé'     },
+      TERMINE:    { bg: 'bg-emerald-50', color: 'text-emerald-600', Icon: CheckCircle, label: 'Terminé'    },
+      ANNULE:     { bg: 'bg-slate-100',  color: 'text-slate-600',   Icon: XCircle,     label: 'Annulé'     },
     };
     const s = styles[statut] ?? styles.EN_ATTENTE;
     return (
-      <div className="inline-flex items-center gap-1 px-3 py-1 text-xs font-bold rounded-full"
-        style={{ backgroundColor: s.bg, color: s.color }}>
-        <s.Icon className="w-3 h-3" />{s.label}
+      <div className={`inline-flex items-center gap-1 px-3 py-1 text-xs font-bold rounded-full ${s.bg} ${s.color}`}>
+        <s.Icon className="w-3 h-3" />
+        {s.label}
       </div>
     );
   };
@@ -95,47 +108,33 @@ export default function MyServices() {
     : services.filter(s => getStatut(s) === filterStatus);
 
   return (
-    <div className="min-h-screen pt-24 pb-20" style={{ backgroundColor: 'var(--light)' }}>
+    <div className="min-h-screen pt-24 pb-20 bg-slate-50">
       <div className="px-4 mx-auto max-w-7xl sm:px-6 lg:px-8">
 
         {/* Header */}
         <div className="mb-10">
-          <div className="inline-flex items-center gap-2 px-4 py-2 mb-6 text-sm font-semibold rounded-full"
-            style={{ backgroundColor: 'rgba(74,111,165,0.1)', color: 'var(--primary)' }}>
-            <span className="w-2 h-2 rounded-full animate-pulse" style={{ backgroundColor: 'var(--accent)' }} />
+          <div className="inline-flex items-center gap-2 px-4 py-2 mb-6 text-sm font-semibold text-blue-700 border border-blue-100 rounded-full bg-blue-50">
+            <ListChecks className="w-4 h-4" />
             {filteredServices.length} demande{filteredServices.length > 1 ? 's' : ''}
           </div>
 
-          <h1 className="mb-4 text-4xl font-black md:text-5xl" style={{ color: 'var(--dark)' }}>
-            {isArtisan ? 'Demandes reçues' : 'Mes demandes'}
-            <span className="text-transparent bg-clip-text"
-              style={{ background: 'linear-gradient(90deg, var(--primary), var(--primary-light))', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
-              {' '}de services
-            </span>
+          <h1 className="mb-4 text-4xl font-black text-slate-900 md:text-5xl">
+            {isArtisan ? 'Demandes reçues' : 'Mes demandes'}{' '}
+            <span className="text-blue-600">de services</span>
           </h1>
 
-          <p className="mb-6 text-lg" style={{ color: 'var(--dark)', opacity: 0.7 }}>
+          <p className="mb-6 text-lg text-slate-600">
             {isArtisan ? 'Gérez les demandes de vos clients' : 'Suivez l\'état de vos demandes de services'}
           </p>
-
-          {!isArtisan && (
-            <div className="flex flex-col gap-4 sm:flex-row">
-              <Link to="/services/request" className="flex-1">
-                <Button variant="primary" className="w-full">Nouvelle demande de service</Button>
-              </Link>
-              <Link to="/services/immediate" className="flex-1">
-                <Button variant="secondary" className="w-full">Service immédiat</Button>
-              </Link>
-            </div>
-          )}
         </div>
 
         {/* Filtres */}
-        <Card className="mb-8">
+        <Card className="p-6 mb-8 bg-white border shadow-sm border-slate-200 rounded-2xl">
           <div className="flex items-center gap-2 mb-4">
-            <Filter className="w-5 h-5" style={{ color: 'var(--primary)' }} />
-            <span className="font-bold" style={{ color: 'var(--dark)' }}>Filtrer par statut</span>
+            <Filter className="w-5 h-5 text-blue-600" />
+            <span className="font-bold text-slate-800">Filtrer par statut</span>
           </div>
+
           <div className="flex flex-wrap gap-2">
             {[
               { value: 'all',        label: 'Tous',       count: services.length },
@@ -144,13 +143,15 @@ export default function MyServices() {
               { value: 'TERMINE',    label: 'Terminés',   count: countBy('TERMINE')   },
               { value: 'ANNULE',     label: 'Annulés',    count: countBy('ANNULE')    },
             ].map(f => (
-              <button key={f.value} onClick={() => setFilterStatus(f.value)}
-                className="px-4 py-2 text-sm font-bold transition-all rounded-lg"
-                style={{
-                  backgroundColor: filterStatus === f.value ? 'var(--primary)' : 'white',
-                  color:           filterStatus === f.value ? 'white' : 'var(--dark)',
-                  border: `2px solid ${filterStatus === f.value ? 'var(--primary)' : 'var(--gray-dark)'}`,
-                }}>
+              <button
+                key={f.value}
+                onClick={() => setFilterStatus(f.value)}
+                className={`px-4 py-2 text-sm font-bold transition-all rounded-xl border-2 ${
+                  filterStatus === f.value
+                    ? 'bg-blue-600 text-white border-blue-600'
+                    : 'bg-white text-slate-700 border-slate-200 hover:border-blue-300 hover:text-blue-600'
+                }`}
+              >
                 {f.label} ({f.count})
               </button>
             ))}
@@ -159,29 +160,33 @@ export default function MyServices() {
 
         {/* Erreur */}
         {error && (
-          <Card className="py-10 mb-8 text-center">
-            <p className="mb-4 font-semibold" style={{ color: '#e74c3c' }}>⚠️ {error}</p>
-            <Button onClick={fetchServices}>Réessayer</Button>
+          <Card className="py-10 mb-8 text-center bg-white border shadow-sm border-slate-200 rounded-2xl">
+            <div className="flex items-center justify-center w-16 h-16 mx-auto mb-4 rounded-full bg-red-50">
+              <AlertCircle className="w-8 h-8 text-red-600" />
+            </div>
+            <p className="mb-4 font-semibold text-red-600">{error}</p>
+            <Button onClick={fetchServices}>
+              <RefreshCw className="w-4 h-4" />
+              Réessayer
+            </Button>
           </Card>
         )}
 
         {/* Liste */}
         {loading ? (
           <div className="flex items-center justify-center py-20">
-            <div className="w-12 h-12 border-4 rounded-full border-t-transparent animate-spin"
-              style={{ borderColor: 'var(--primary)' }} />
+            <div className="w-12 h-12 border-4 border-blue-600 rounded-full border-t-transparent animate-spin" />
           </div>
         ) : !error && filteredServices.length > 0 ? (
           <div className="space-y-4">
             {filteredServices.map(service => {
               const statut = getStatut(service);
               return (
-                <Card key={service.id} hover className="p-6">
+                <Card key={service.id} hover className="p-6 bg-white border shadow-sm border-slate-200 rounded-2xl">
                   <div className="flex flex-col gap-6 md:flex-row">
 
                     {/* Avatar */}
-                    <div className="flex-shrink-0 w-full h-32 overflow-hidden md:w-32 rounded-xl"
-                      style={{ backgroundColor: 'var(--gray)' }}>
+                    <div className="flex-shrink-0 w-full h-32 overflow-hidden border md:w-32 rounded-2xl bg-slate-100 border-slate-200">
                       {(() => {
                         const person = isArtisan ? service.client : service.artisan;
                         const photo  = person?.photo_profil ?? person?.photo ?? person?.image;
@@ -189,8 +194,7 @@ export default function MyServices() {
                         return photo ? (
                           <img src={photo} alt={nom} className="object-cover w-full h-full" />
                         ) : (
-                          <div className="flex items-center justify-center w-full h-full text-3xl font-black text-white"
-                            style={{ background: 'linear-gradient(135deg, var(--primary), var(--primary-light))' }}>
+                          <div className="flex items-center justify-center w-full h-full text-3xl font-black text-white bg-blue-600">
                             {nom.charAt(0).toUpperCase()}
                           </div>
                         );
@@ -199,56 +203,75 @@ export default function MyServices() {
 
                     {/* Infos */}
                     <div className="flex-1">
-                      <div className="flex items-start justify-between mb-3">
+                      <div className="flex flex-col gap-4 mb-4 md:flex-row md:items-start md:justify-between">
                         <div>
-                          <h3 className="mb-1 text-xl font-bold" style={{ color: 'var(--dark)' }}>
+                          <h3 className="mb-1 text-xl font-bold text-slate-900">
                             {service.titre ?? service.title ?? 'Demande de service'}
                           </h3>
-                          <p className="mb-2 text-sm font-semibold" style={{ color: 'var(--accent)' }}>
+
+                          <p className="mb-2 text-sm font-semibold text-blue-600">
                             {isArtisan
                               ? `${service.client?.prenom ?? ''} ${service.client?.nom ?? ''}`.trim() || service.client?.email
                               : `${service.artisan?.prenom ?? ''} ${service.artisan?.nom ?? ''}`.trim() || service.artisan?.email
                             }
                             {!isArtisan && service.artisan?.specialite ? ` — ${service.artisan.specialite}` : ''}
                           </p>
+
                           {service.description && (
-                            <p className="mb-2 text-sm" style={{ color: 'var(--dark)', opacity: 0.7 }}>
+                            <p className="mb-2 text-sm leading-6 text-slate-600">
                               {service.description}
                             </p>
                           )}
                         </div>
+
                         {getStatusBadge(statut)}
                       </div>
 
-                      <div className="grid grid-cols-2 gap-4 mb-4 md:grid-cols-4">
-                        <div>
-                          <div className="mb-1 text-xs" style={{ color: 'var(--dark)', opacity: 0.6 }}>Date demande</div>
-                          <div className="text-sm font-bold" style={{ color: 'var(--dark)' }}>
+                      <div className="grid grid-cols-2 gap-4 mb-5 md:grid-cols-4">
+                        <div className="p-3 border rounded-xl bg-slate-50 border-slate-200">
+                          <div className="flex items-center gap-2 mb-1 text-xs text-slate-500">
+                            <CalendarDays className="w-4 h-4" />
+                            Date demande
+                          </div>
+                          <div className="text-sm font-bold text-slate-800">
                             {service.created_at ? new Date(service.created_at).toLocaleDateString('fr-FR') : '—'}
                           </div>
                         </div>
-                        <div>
-                          <div className="mb-1 text-xs" style={{ color: 'var(--dark)', opacity: 0.6 }}>Budget estimé</div>
-                          <div className="text-sm font-bold" style={{ color: 'var(--accent)' }}>
+
+                        <div className="p-3 border rounded-xl bg-slate-50 border-slate-200">
+                          <div className="flex items-center gap-2 mb-1 text-xs text-slate-500">
+                            <Wallet className="w-4 h-4" />
+                            Budget estimé
+                          </div>
+                          <div className="text-sm font-bold text-blue-600">
                             {service.budget ? `${Number(service.budget).toLocaleString('fr-FR')} FCFA` : '—'}
                           </div>
                         </div>
-                        <div>
-                          <div className="mb-1 text-xs" style={{ color: 'var(--dark)', opacity: 0.6 }}>Urgence</div>
-                          <div className="text-sm font-bold" style={{ color: service.urgent ? '#ef4444' : 'var(--dark)' }}>
+
+                        <div className="p-3 border rounded-xl bg-slate-50 border-slate-200">
+                          <div className="flex items-center gap-2 mb-1 text-xs text-slate-500">
+                            <Siren className="w-4 h-4" />
+                            Urgence
+                          </div>
+                          <div className={`text-sm font-bold ${service.urgent ? 'text-red-600' : 'text-slate-800'}`}>
                             {service.urgent ? 'Urgent' : 'Normal'}
                           </div>
                         </div>
-                        <div>
-                          <div className="mb-1 text-xs" style={{ color: 'var(--dark)', opacity: 0.6 }}>Référence</div>
-                          <div className="text-sm font-bold" style={{ color: 'var(--dark)' }}>#{service.id}</div>
+
+                        <div className="p-3 border rounded-xl bg-slate-50 border-slate-200">
+                          <div className="flex items-center gap-2 mb-1 text-xs text-slate-500">
+                            <Hash className="w-4 h-4" />
+                            Référence
+                          </div>
+                          <div className="text-sm font-bold text-slate-800">#{service.id}</div>
                         </div>
                       </div>
 
                       <div className="flex flex-wrap gap-3">
                         <Link to={`/service/${service.id}`}>
                           <Button variant="outline" className="!px-4 !py-2 !text-sm">
-                            <Eye className="w-4 h-4" /> Détails
+                            <Eye className="w-4 h-4" />
+                            Détails
                           </Button>
                         </Link>
 
@@ -261,30 +284,41 @@ export default function MyServices() {
                         )}
 
                         {!isArtisan && statut === 'EN_ATTENTE' && (
-                          <Button variant="outline" className="!px-4 !py-2 !text-sm"
-                            style={{ color: '#ef4444', borderColor: '#ef4444' }}
-                            onClick={() => handleCancel(service.id)}>
+                          <Button
+                            variant="outline"
+                            className="!px-4 !py-2 !text-sm !text-red-600 !border-red-600 hover:!bg-red-50"
+                            onClick={() => handleCancel(service.id)}
+                          >
                             Annuler
                           </Button>
                         )}
 
                         {isArtisan && statut === 'EN_ATTENTE' && (
                           <>
-                            <Button variant="primary" className="!px-4 !py-2 !text-sm"
-                              onClick={() => handleAccepter(service.id)}>
+                            <Button
+                              variant="primary"
+                              className="!px-4 !py-2 !text-sm"
+                              onClick={() => handleAccepter(service.id)}
+                            >
                               Accepter
                             </Button>
-                            <Button variant="outline" className="!px-4 !py-2 !text-sm"
-                              style={{ color: '#ef4444', borderColor: '#ef4444' }}
-                              onClick={() => handleRefuser(service.id)}>
+
+                            <Button
+                              variant="outline"
+                              className="!px-4 !py-2 !text-sm !text-red-600 !border-red-600 hover:!bg-red-50"
+                              onClick={() => handleRefuser(service.id)}
+                            >
                               Refuser
                             </Button>
                           </>
                         )}
 
                         {isArtisan && statut === 'ACCEPTE' && (
-                          <Button variant="secondary" className="!px-4 !py-2 !text-sm"
-                            onClick={() => handleTerminer(service.id)}>
+                          <Button
+                            variant="secondary"
+                            className="!px-4 !py-2 !text-sm"
+                            onClick={() => handleTerminer(service.id)}
+                          >
                             Marquer terminé
                           </Button>
                         )}
@@ -296,20 +330,20 @@ export default function MyServices() {
             })}
           </div>
         ) : !error && (
-          <Card className="py-20 text-center">
-            <div className="flex items-center justify-center w-20 h-20 mx-auto mb-6 rounded-full"
-              style={{ backgroundColor: 'rgba(255,126,95,0.1)' }}>
-              <AlertCircle className="w-10 h-10" style={{ color: 'var(--accent)' }} />
+          <Card className="py-20 text-center bg-white border shadow-sm border-slate-200 rounded-2xl">
+            <div className="flex items-center justify-center w-20 h-20 mx-auto mb-6 rounded-full bg-amber-50">
+              <AlertCircle className="w-10 h-10 text-amber-600" />
             </div>
-            <h3 className="mb-3 text-2xl font-bold" style={{ color: 'var(--dark)' }}>Aucune demande</h3>
-            <p className="mb-6 text-sm" style={{ color: 'var(--dark)', opacity: 0.7 }}>
+
+            <h3 className="mb-3 text-2xl font-bold text-slate-900">Aucune demande</h3>
+
+            <p className="mb-6 text-sm text-slate-600">
               {isArtisan
                 ? 'Aucune demande de service reçue pour l\'instant.'
                 : 'Vous n\'avez pas encore de demande de service.'}
             </p>
-            {!isArtisan && (
-              <Link to="/services/request"><Button>Faire une demande</Button></Link>
-            )}
+
+            
           </Card>
         )}
       </div>
