@@ -64,6 +64,9 @@ export const authAPI = {
   /** Connexion */
   login: (data) => post("/auth/login", data),
 
+  /**Connexion admin */
+  loginAdmin: (data) => post("/admin/login", data),
+
   /** Utilisateur connecté */
   me: () => get("/auth/me"),
 
