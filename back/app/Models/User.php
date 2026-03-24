@@ -38,6 +38,11 @@ class User extends Authenticatable
         return $this->mot_de_passe;
     }
 
+    public function getAuthPasswordName(): string
+    {
+        return 'mot_de_passe';
+    }
+
     protected $casts = [
         'role' => 'string',
         'suspendu' => 'boolean',

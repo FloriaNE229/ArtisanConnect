@@ -38,6 +38,8 @@ class Notification extends Model
     const TYPE_SERVICE_TERMINE  = 'SERVICE_TERMINE';
     const TYPE_SERVICE_IMMEDIAT = 'SERVICE_IMMEDIAT';
     const TYPE_ARTISAN_EN_ROUTE = 'ARTISAN_EN_ROUTE';
+    const TYPE_SERVICE_ANNULE        = 'SERVICE_ANNULE';
+    const TYPE_SERVICE_IMMEDIAT_ANNULE = 'SERVICE_IMMEDIAT_ANNULE'; 
 
     // -------------------------
     // Scopes

@@ -19,6 +19,7 @@ use App\Http\Controllers\Admin\AdminAvisController;
 use App\Http\Controllers\Admin\AdminServiceController;
 use App\Http\Controllers\Admin\AdminNotificationController;
 use App\Http\Controllers\Admin\AdminDashboardController;
+use App\Http\Controllers\Admin\AdminAuthController;
 
 
 // Routes publiques
@@ -179,6 +180,9 @@ Route::middleware('auth:sanctum', 'suspendu')->group(function () {
         });
     });
 });
+
+// ── Auth Admin (public) ───────────────────────────────────
+Route::post('admin/login', [AdminAuthController::class, 'login']);
 
 //ROUTES ADMIN UNIQUEMENT
 Route::middleware(['auth:sanctum', 'admin'])->prefix('admin')->group(function () {
