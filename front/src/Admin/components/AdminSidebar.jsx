@@ -43,7 +43,7 @@ export default function AdminSidebar() {
           <Hammer className="w-6 h-6 text-white" strokeWidth={2.5} />
         </div>
         <div>
-          <h1 className="text-lg font-bold" style={{ color: '#2b2d42' }}>ArtisanConnect</h1>
+          <h1 className="text-lg font-bold" style={{ color: '#2b2d42' }}>DigitalArt</h1>
           <p className="text-xs" style={{ color: '#6c757d' }}>Admin Panel</p>
         </div>
       </Link>

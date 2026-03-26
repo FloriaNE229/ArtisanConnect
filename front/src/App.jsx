@@ -53,11 +53,12 @@ import AdminAppointments        from "./Admin/pages/AdminAppointments";
 import AdminReviews             from "./Admin/pages/AdminReviews";
 import AdminSettings            from "./Admin/pages/AdminSettings";
 import AdminLayout              from "./Admin/layouts/AdminLayout";
+import AdminSessionGuard        from "./Admin/pages/AdminSessionGuard";
 
 // Guards
 import { AuthProvider } from "./Clients/components/Auth/AuthContext";
-import ProtectedRoute       from "./component/ProtectedRoute";
-import AdminProtectedRoute  from "./component/AdminProtectedRoute";
+import ProtectedRoute      from "./component/ProtectedRoute";
+import AdminProtectedRoute from "./component/AdminProtectedRoute";
 
 // ── Wrapper layout client
 function ClientLayout({ children, pt }) {
@@ -76,146 +77,152 @@ function App() {
   return (
     <AuthProvider>
       <BrowserRouter>
-        <Routes>
 
-          {/* ══════════════════════════════════════
-              Routes publiques
-          ══════════════════════════════════════ */}
-          <Route path="/" element={<ClientLayout><Home /></ClientLayout>} />
-          <Route path="/login" element={<ClientLayout><Login /></ClientLayout>} />
-          <Route path="/register" element={<ClientLayout pt="pt-20 md:pt-20"><Register /></ClientLayout>} />
-          <Route path="/forgot-password" element={<ClientLayout><ForgotPassword /></ClientLayout>} />
-          <Route path="/artisans" element={<ClientLayout><ArtisansList /></ClientLayout>} />
-          <Route path="/artisan/:id" element={<ClientLayout><ArtisanDetail /></ClientLayout>} />
+        {/* ─────────────────────────────────────────────────────────
+            AdminSessionGuard doit être DANS BrowserRouter
+            (il utilise useLocation) mais EN DEHORS de <Routes>
+            pour surveiller TOUTES les navigations.
+        ───────────────────────────────────────────────────────── */}
+        <AdminSessionGuard>
+          <Routes>
 
-          {/* ══════════════════════════════════════
-              Routes protégées (client / artisan)
-          ══════════════════════════════════════ */}
-          <Route path="/my-services" element={
-            <ClientLayout>
-              <ProtectedRoute allowedRoles={["CLIENT", "ARTISAN"]}><MyServices /></ProtectedRoute>
-            </ClientLayout>
-          } />
+            {/* ══════════════════════════════════════
+                Routes publiques
+            ══════════════════════════════════════ */}
+            <Route path="/" element={<ClientLayout><Home /></ClientLayout>} />
+            <Route path="/login" element={<ClientLayout><Login /></ClientLayout>} />
+            <Route path="/register" element={<ClientLayout pt="pt-20 md:pt-20"><Register /></ClientLayout>} />
+            <Route path="/forgot-password" element={<ClientLayout><ForgotPassword /></ClientLayout>} />
+            <Route path="/artisans" element={<ClientLayout><ArtisansList /></ClientLayout>} />
+            <Route path="/artisan/:id" element={<ClientLayout><ArtisanDetail /></ClientLayout>} />
 
-          <Route path="/services/request" element={
-            <ClientLayout>
-              <ProtectedRoute allowedRoles={["CLIENT"]}><ServiceRequest /></ProtectedRoute>
-            </ClientLayout>
-          } />
+            {/* ══════════════════════════════════════
+                Routes protégées (client / artisan)
+            ══════════════════════════════════════ */}
+            <Route path="/my-services" element={
+              <ClientLayout>
+                <ProtectedRoute allowedRoles={["CLIENT", "ARTISAN"]}><MyServices /></ProtectedRoute>
+              </ClientLayout>
+            } />
 
-          <Route path="/services/request/:artisanId" element={
-            <ClientLayout>
-              <ProtectedRoute allowedRoles={["CLIENT"]}><ServiceRequest /></ProtectedRoute>
-            </ClientLayout>
-          } />
+            <Route path="/services/request" element={
+              <ClientLayout>
+                <ProtectedRoute allowedRoles={["CLIENT"]}><ServiceRequest /></ProtectedRoute>
+              </ClientLayout>
+            } />
 
-          <Route path="/services/immediate" element={
-            <ClientLayout>
-              <ProtectedRoute allowedRoles={["CLIENT"]}><ServiceImmediate /></ProtectedRoute>
-            </ClientLayout>
-          } />
+            <Route path="/services/request/:artisanId" element={
+              <ClientLayout>
+                <ProtectedRoute allowedRoles={["CLIENT"]}><ServiceRequest /></ProtectedRoute>
+              </ClientLayout>
+            } />
 
-          <Route path="/my-appointments" element={
-            <ClientLayout>
-              <ProtectedRoute allowedRoles={["CLIENT", "ARTISAN"]}><MyAppointments /></ProtectedRoute>
-            </ClientLayout>
-          } />
+            <Route path="/services/immediate" element={
+              <ClientLayout>
+                <ProtectedRoute allowedRoles={["CLIENT"]}><ServiceImmediate /></ProtectedRoute>
+              </ClientLayout>
+            } />
 
-          <Route path="/appointments/book" element={
-            <ClientLayout>
-              <ProtectedRoute allowedRoles={["CLIENT"]}><BookAppointment /></ProtectedRoute>
-            </ClientLayout>
-          } />
+            <Route path="/my-appointments" element={
+              <ClientLayout>
+                <ProtectedRoute allowedRoles={["CLIENT", "ARTISAN"]}><MyAppointments /></ProtectedRoute>
+              </ClientLayout>
+            } />
 
-          <Route path="/appointments/book/:artisanId" element={
-            <ClientLayout>
-              <ProtectedRoute allowedRoles={["CLIENT"]}><BookAppointment /></ProtectedRoute>
-            </ClientLayout>
-          } />
+            <Route path="/appointments/book" element={
+              <ClientLayout>
+                <ProtectedRoute allowedRoles={["CLIENT"]}><BookAppointment /></ProtectedRoute>
+              </ClientLayout>
+            } />
 
-          <Route path="/profile" element={
-            <ClientLayout>
-              <ProtectedRoute allowedRoles={["CLIENT", "ARTISAN"]}><ClientProfile /></ProtectedRoute>
-            </ClientLayout>
-          } />
+            <Route path="/appointments/book/:artisanId" element={
+              <ClientLayout>
+                <ProtectedRoute allowedRoles={["CLIENT"]}><BookAppointment /></ProtectedRoute>
+              </ClientLayout>
+            } />
 
-          <Route path="/profile/edit" element={
-            <ClientLayout>
-              <ProtectedRoute allowedRoles={["CLIENT", "ARTISAN"]}><EditProfile /></ProtectedRoute>
-            </ClientLayout>
-          } />
+            <Route path="/profile" element={
+              <ClientLayout>
+                <ProtectedRoute allowedRoles={["CLIENT", "ARTISAN"]}><ClientProfile /></ProtectedRoute>
+              </ClientLayout>
+            } />
 
-          <Route path="/atelier/create" element={
-            <ClientLayout>
-              <ProtectedRoute allowedRoles={["ARTISAN"]}><CreateAtelier /></ProtectedRoute>
-            </ClientLayout>
-          } />
+            <Route path="/profile/edit" element={
+              <ClientLayout>
+                <ProtectedRoute allowedRoles={["CLIENT", "ARTISAN"]}><EditProfile /></ProtectedRoute>
+              </ClientLayout>
+            } />
 
-          <Route path="/atelier/:id/edit" element={
-            <ClientLayout>
-              <ProtectedRoute allowedRoles={["ARTISAN"]}><EditAtelier /></ProtectedRoute>
-            </ClientLayout>
-          } />
+            <Route path="/atelier/create" element={
+              <ClientLayout>
+                <ProtectedRoute allowedRoles={["ARTISAN"]}><CreateAtelier /></ProtectedRoute>
+              </ClientLayout>
+            } />
 
-          <Route path="/atelier/horaires" element={
-            <ClientLayout>
-              <ProtectedRoute allowedRoles={["ARTISAN"]}><GestionHoraires /></ProtectedRoute>
-            </ClientLayout>
-          } />
+            <Route path="/atelier/:id/edit" element={
+              <ClientLayout>
+                <ProtectedRoute allowedRoles={["ARTISAN"]}><EditAtelier /></ProtectedRoute>
+              </ClientLayout>
+            } />
 
-          <Route path="/atelier/oeuvres" element={
-            <ClientLayout>
-              <ProtectedRoute allowedRoles={["ARTISAN"]}><GestionOeuvres /></ProtectedRoute>
-            </ClientLayout>
-          } />
+            <Route path="/atelier/horaires" element={
+              <ClientLayout>
+                <ProtectedRoute allowedRoles={["ARTISAN"]}><GestionHoraires /></ProtectedRoute>
+              </ClientLayout>
+            } />
 
-          <Route path="/atelier/offres" element={
-            <ClientLayout>
-              <ProtectedRoute allowedRoles={["ARTISAN"]}><GestionOffres /></ProtectedRoute>
-            </ClientLayout>
-          } />
+            <Route path="/atelier/oeuvres" element={
+              <ClientLayout>
+                <ProtectedRoute allowedRoles={["ARTISAN"]}><GestionOeuvres /></ProtectedRoute>
+              </ClientLayout>
+            } />
 
-          <Route path="/reviews/write/:artisanId" element={
-            <ClientLayout>
-              <ProtectedRoute allowedRoles={["CLIENT"]}><WriteReview /></ProtectedRoute>
-            </ClientLayout>
-          } />
+            <Route path="/atelier/offres" element={
+              <ClientLayout>
+                <ProtectedRoute allowedRoles={["ARTISAN"]}><GestionOffres /></ProtectedRoute>
+              </ClientLayout>
+            } />
 
-          <Route path="/my-reviews" element={
-            <ClientLayout>
-              <ProtectedRoute allowedRoles={["CLIENT"]}><MyReviews /></ProtectedRoute>
-            </ClientLayout>
-          } />
+            <Route path="/reviews/write/:artisanId" element={
+              <ClientLayout>
+                <ProtectedRoute allowedRoles={["CLIENT"]}><WriteReview /></ProtectedRoute>
+              </ClientLayout>
+            } />
 
-          <Route path="/notifications" element={
-            <ClientLayout>
-              <ProtectedRoute allowedRoles={["CLIENT", "ARTISAN"]}><NotificationsList /></ProtectedRoute>
-            </ClientLayout>
-          } />
+            <Route path="/my-reviews" element={
+              <ClientLayout>
+                <ProtectedRoute allowedRoles={["CLIENT"]}><MyReviews /></ProtectedRoute>
+              </ClientLayout>
+            } />
 
-          {/* ══════════════════════════════════════
-              Routes Admin
-              /admin/login  → page publique
-              /admin/*      → protégé ADMIN seulement
-          ══════════════════════════════════════ */}
-          <Route path="/admin/login" element={<AdminLogin />} />
+            <Route path="/notifications" element={
+              <ClientLayout>
+                <ProtectedRoute allowedRoles={["CLIENT", "ARTISAN"]}><NotificationsList /></ProtectedRoute>
+              </ClientLayout>
+            } />
 
-          {/* AdminProtectedRoute vérifie le rôle ADMIN avant d'afficher AdminLayout */}
-          <Route path="/admin" element={<AdminProtectedRoute />}>
-            <Route element={<AdminLayout />}>
-              <Route path="dashboard"    element={<AdminDashboard />} />
-              <Route path="users"        element={<AdminUsers />} />
-              <Route path="verification" element={<AdminArtisanVerification />} />
-              <Route path="moderation"   element={<AdminModeration />} />
-              <Route path="ateliers"     element={<AdminAteliers />} />
-              <Route path="services"     element={<AdminServices />} />
-              <Route path="appointments" element={<AdminAppointments />} />
-              <Route path="reviews"      element={<AdminReviews />} />
-              <Route path="settings"     element={<AdminSettings />} />
+            {/* ══════════════════════════════════════
+                Routes Admin
+            ══════════════════════════════════════ */}
+            <Route path="/admin/login" element={<AdminLogin />} />
+
+            <Route path="/admin" element={<AdminProtectedRoute />}>
+              <Route element={<AdminLayout />}>
+                <Route path="dashboard"    element={<AdminDashboard />} />
+                <Route path="users"        element={<AdminUsers />} />
+                <Route path="verification" element={<AdminArtisanVerification />} />
+                <Route path="moderation"   element={<AdminModeration />} />
+                <Route path="ateliers"     element={<AdminAteliers />} />
+                <Route path="services"     element={<AdminServices />} />
+                <Route path="appointments" element={<AdminAppointments />} />
+                <Route path="reviews"      element={<AdminReviews />} />
+                <Route path="settings"     element={<AdminSettings />} />
+              </Route>
             </Route>
-          </Route>
 
-        </Routes>
+          </Routes>
+        </AdminSessionGuard>
+
       </BrowserRouter>
     </AuthProvider>
   );

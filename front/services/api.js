@@ -384,7 +384,12 @@ export const adminAPI = {
 
   // ── Utilisateurs ──────────────────────────────────────
   users: {
-    index: () => get("/admin/users"),
+    index: (params = {}) => {
+      const qs = new URLSearchParams(
+        Object.fromEntries(Object.entries(params).filter(([, v]) => v !== undefined && v !== null && v !== ''))
+      ).toString();
+      return get(`/admin/users${qs ? `?${qs}` : ''}`);
+    },
     show: (id) => get(`/admin/users/${id}`),
     suspendre: (id) => patch(`/admin/users/${id}/suspendre`),
     reactiver: (id) => patch(`/admin/users/${id}/reactiver`),
